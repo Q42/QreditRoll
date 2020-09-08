@@ -1,0 +1,73 @@
+/* TEAM */
+	Chef:Juanjo Bernabeu
+	Contact: hello [at] humanstxt.org
+	Twitter: @juanjobernabeu
+	From:Barcelona, Catalonia, Spain
+
+	UI developer: Maria Macias
+	Twitter: @maria_ux
+	From:Barcelona, Catalonia, Spain
+
+	One eyed illustrator: Carlos Mañas
+	Twitter: @oneeyedman
+	From:Madrid, Spain
+
+	Standard Man: Abel Cabans
+	Twitter: @abelcabans
+	From:Barcelona, Catalonia, Spain
+
+	Web designer: Abel Sutilo
+	Twitter: @abelsutilo
+	From:Sevilla, Andalucia, Spain
+
+/* THANKS */
+
+	(First) EN Translator: Jos Flores
+	Twitter: @prosciuttos
+	From: Barcelona, Catalonia, Spain
+
+	CA Translator: Eva AC
+	Twitter: @evaac
+	From:Barcelona, Catalonia, Spain
+
+	EN Translator: Marta Armada
+	Twitter: @martuishere
+	From: Barcelona, Catalonia, Spain
+
+	RU Translator: Alexey Bass
+	Twitter: @alexey_bass
+	Location: Israel, Netanya
+
+	RU Translator: Vladimir Epifanov
+	Twitter: @voldmar
+	Location: Moscow, Russia
+
+	NL Translator: Rowdy Rabouw
+	Twitter: @rowdyrabouw
+	Location: Gouda, The Netherlands
+
+	DE Translator: Dennis Fischer
+	Twitter: @ichderfisch
+	Location: Düsseldorf / Germany
+
+	CZ Translator: Daniel Kršiak
+	Twitter: @krsiakdaniel
+	Location: Czech Republic
+
+	ZH Translator: Ana Villalba
+	Location: Spain
+
+	JA Translator: Clémence Haure
+	Location: Spain
+
+	FR Translator: Thibaud Desodt
+	Location: Belgium
+
+	Media Queries by: Marta Armada (@martuishere) and Javier Usobiaga (@htmlboy)
+
+
+/* SITE */
+	Last update:2012/02/04
+	Language: Català / Czech / Deutsch / English / Castellano / Japanese / Dutch / Russian / Chinese
+	Doctype:HTML5
+	IDE: Sublime Text, Notepad++, FileZilla, Photoshop

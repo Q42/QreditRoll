@@ -1,0 +1,61 @@
+* {
+  margin: 0;
+}
+
+html, body {
+  background-color: transparent;
+}
+
+body {
+  color: #FFF;
+  overflow: hidden;
+  font-family: proxima-nova, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 150%;
+  opacity: 0;
+  transition: background-color 2s, opacity 2s;
+}
+
+body.active {
+  opacity: 1;
+  background-color: #000;
+}
+
+
+#qredits {
+ width: 100%;
+ text-align: center;
+ transform: translateY(100vh);
+}
+
+body.active #qredits {
+  transform: translateY(-100%);
+}
+
+h2 {
+  margin-top: 1em;
+  font-weight: 800;
+  font-size: 200%;
+}
+h2:first-child {
+  margin-top: 0;
+}
+
+#close {
+  border: none;
+  background: transparent;
+  color: #FFF;
+  font-size: 100%;
+  position: absolute;
+  z-index: 2;
+  top: 6px;
+  right: 6px;
+  cursor: pointer;
+  opacity: .8;
+  transition: all 0.15s;
+}
+#close:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
