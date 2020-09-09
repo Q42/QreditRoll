@@ -44,8 +44,6 @@ function initQreditRoll() {
   let humansTxtUrl = `https://cors-anywhere.herokuapp.com/${hostDomain}/humans.txt`;
   if (hostDomain.indexOf('//localhost') > -1) {
     humansTxtUrl = `${hostDomain}/humans.txt`;
-  } else if (hostDomain.indexOf('//q42.github.io') > -1) {
-    humansTxtUrl = `${hostDomain}/QreditRoll/humans.txt`;
   }
 
   const xhttp = new XMLHttpRequest();
