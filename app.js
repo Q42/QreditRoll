@@ -25,15 +25,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
   }
 
   document.getElementById('close').addEventListener('click', (event) => {
-    stopQredits();
+    stopQreditRoll();
   })
 });
 
 window.addEventListener('message', (event) => {
   if (event.origin.startsWith(hostDomain)) {
     switch (event.data.type) {
-      case 'startQredits':
-        startQredits();
+      case 'startQreditRoll':
+        startQreditRoll();
         break;
       default:
         if (!event.data.source || event.data.source.indexOf('vue-devtools') == -1) {
@@ -61,7 +61,7 @@ function handleHumansTxt(humansTxt) {
   });
 }
 
-function startQredits() {
+function startQreditRoll() {
   // TODO check if humans.txt loaded successfully
 
   const player = document.getElementById('player');
@@ -75,11 +75,11 @@ function startQredits() {
   document.body.classList.add('active');
 
   timeout = setTimeout(function() {
-    stopQredits();
+    stopQreditRoll();
   }, (lines + 4) * 1000);
 }
 
-function stopQredits() {
+function stopQreditRoll() {
   clearTimeout(timeout);
   timeout = null;
 
@@ -99,7 +99,7 @@ function stopQredits() {
       player.pause();
       player.currentTime = 0;
 
-      parent.postMessage({ type: 'stopQredits' }, hostDomain);
+      parent.postMessage({ type: 'stopQreditRoll' }, hostDomain);
 
       clearInterval(fadeout);
     }

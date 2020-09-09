@@ -14,7 +14,7 @@ Go to http://localhost:8000/test.html.
 ## How to implement
 Include the QreditRoll script at the end of the `body` element of your website.
 
-`<script src="https://qreditroll.com/qredits.js"></script>`
+`<script src="https://qreditroll.com/qreditroll.js"></script>`
 
 Make sure you have a `humans.txt` file, like explained on http://humanstxt.org/.
 

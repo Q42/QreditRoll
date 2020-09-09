@@ -1,14 +1,14 @@
-QreditsInstance = function() {
+QreditRollInstance = function() {
   let clientDomain = null;
   let client = null;
 
-  const scriptEl = document.querySelector('script[src*="/qredits.js"]');
+  const scriptEl = document.querySelector('script[src*="/qreditroll.js"]');
   if (scriptEl) {
-    clientDomain = scriptEl.src.replace('/qredits.js', '');
+    clientDomain = scriptEl.src.replace('/qreditroll.js', '');
   }
 
   let frame = document.createElement('iframe');
-  frame.id = 'qreditsframe';
+  frame.id = 'qreditrollframe';
   frame.src = `${clientDomain}?hostDomain=${encodeURI(window.location.origin)}`;
   frame.allowtransparancy = 'true';
   frame.allow = 'autoplay';
@@ -45,7 +45,7 @@ QreditsInstance = function() {
   window.addEventListener('message', (event) => {
     if (event.origin.startsWith(clientDomain)) {
       switch (event.data.type) {
-        case 'stopQredits':
+        case 'stopQreditRoll':
           this.stop();
           break;
         default:
@@ -67,7 +67,7 @@ QreditsInstance = function() {
                   overflow: hidden;
                   `;
 
-    client.postMessage({ type: 'startQredits' }, clientDomain);
+    client.postMessage({ type: 'startQreditRoll' }, clientDomain);
   };
 
   this.stop = function() {
@@ -83,4 +83,4 @@ QreditsInstance = function() {
   }
 };
 
-const Qredits = new QreditsInstance();
+const QreditRoll = new QreditRollInstance();
