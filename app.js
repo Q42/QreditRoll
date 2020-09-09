@@ -1,4 +1,4 @@
-let hostDomain = '';
+let hostDomain = null;
 let lines = 0;
 let timeout = null;
 let humansTxtLoaded = false;
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 window.addEventListener('message', (event) => {
-  if (event.origin.startsWith(hostDomain)) {
+  if (hostDomain && event.origin.startsWith(hostDomain)) {
     switch (event.data.type) {
       case 'startQreditRoll':
         startQreditRoll();
