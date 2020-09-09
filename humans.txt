@@ -1,73 +1,108 @@
 /* TEAM */
-	Chef:Juanjo Bernabeu
-	Contact: hello [at] humanstxt.org
-	Twitter: @juanjobernabeu
-	From:Barcelona, Catalonia, Spain
+Concept, design & development: Chris Waalberg from Q42
+Site: q42.com
+Email: chris@q42.com
 
-	UI developer: Maria Macias
-	Twitter: @maria_ux
-	From:Barcelona, Catalonia, Spain
+Executive coach: Marcel Duin from Q42
+Site: q42.com
+Email: marcel@q42.com
 
-	One eyed illustrator: Carlos Mañas
-	Twitter: @oneeyedman
-	From:Madrid, Spain
+Executive architect: Michiel Post from Q42
+Site: q42.com
+Email: michiel@q42.com
 
-	Standard Man: Abel Cabans
-	Twitter: @abelcabans
-	From:Barcelona, Catalonia, Spain
+Executive editor: Benny Coomans from Q42
+Site: q42.com
+Email: benny@q42.com
 
-	Web designer: Abel Sutilo
-	Twitter: @abelsutilo
-	From:Sevilla, Andalucia, Spain
+Executive tester: Suzanne Waalberg from Q42
+Site: q42.com
+Email: suzanne@q42.com
 
 /* THANKS */
-
-	(First) EN Translator: Jos Flores
-	Twitter: @prosciuttos
-	From: Barcelona, Catalonia, Spain
-
-	CA Translator: Eva AC
-	Twitter: @evaac
-	From:Barcelona, Catalonia, Spain
-
-	EN Translator: Marta Armada
-	Twitter: @martuishere
-	From: Barcelona, Catalonia, Spain
-
-	RU Translator: Alexey Bass
-	Twitter: @alexey_bass
-	Location: Israel, Netanya
-
-	RU Translator: Vladimir Epifanov
-	Twitter: @voldmar
-	Location: Moscow, Russia
-
-	NL Translator: Rowdy Rabouw
-	Twitter: @rowdyrabouw
-	Location: Gouda, The Netherlands
-
-	DE Translator: Dennis Fischer
-	Twitter: @ichderfisch
-	Location: Düsseldorf / Germany
-
-	CZ Translator: Daniel Kršiak
-	Twitter: @krsiakdaniel
-	Location: Czech Republic
-
-	ZH Translator: Ana Villalba
-	Location: Spain
-
-	JA Translator: Clémence Haure
-	Location: Spain
-
-	FR Translator: Thibaud Desodt
-	Location: Belgium
-
-	Media Queries by: Marta Armada (@martuishere) and Javier Usobiaga (@htmlboy)
-
+Ahsan Fazal
+Anouk Visser
+Anton Hogewoning
+Arian van Gend
+Bart Witting
+Bas Warmerdam
+Bas van Bovene
+Bas Tossings
+Benjamin de Jager
+Betty Kronemeijer
+Bob van Oorschot
+Bram Stege
+Bram Lohman
+Cynthia Wijntje
+Daniello Doran
+Dion van Beelen
+Djovanni Tehubijuluw
+Erik Deijl
+Erwin Verbruggen
+Floris Dijkstra
+Frank Raterink
+Frank van der Laan
+Furkan Simsir
+Gerard Dorst
+Guido Bouman
+Guus Goossens
+Herman Banken
+Jaap Taal
+Jaap Mengers
+Jan Jouke Harms
+Jasper Kaizer
+Jeroen Gijsman
+Jeroen van den Burg
+Jimmy Aupperlee
+Jiri Swen
+Johan Huijkman
+Joost van Hassel
+Joost Naaijen
+Kars Veling
+Kevin van der Laan
+Korjan van Wieringen
+Laurens van den Oever
+Leonard Punt
+Lisa Klein
+Lotte Meijer
+Louise Bicker Caarten
+Lukas van Driel
+Marieke Smits
+Martin Kool
+Mathijs Kadijk
+Mathijs Bernson
+Maurice Haak
+Nino van Hooff
+Remco Veldkamp
+Ricardo Snoek
+Richard Lems
+Roan Hageman
+Rob Lokhorst
+Roelf-Jan de Vries
+Roland Kierkels
+Ruben Bimmel
+Sander de Vos
+Sander van Wickeren
+Sanne Swagerman
+Sebastian Lobato Genco
+Stef Brooijmans
+Taco Ekkel
+Ted de Koning
+Thijs Suijten
+Timon van Waardhuizen
+Tim van Steenis
+Tim van Deursen
+Tobias Stikvoort
+Tom Lokhorst
+Tomas Harkema
+Tom Hagen
+Ward Nijman
+Wietske Rodenhuis
+Wouter van Drunen
+Wouter Deenik
 
 /* SITE */
-	Last update:2012/02/04
-	Language: Català / Czech / Deutsch / English / Castellano / Japanese / Dutch / Russian / Chinese
-	Doctype:HTML5
-	IDE: Sublime Text, Notepad++, FileZilla, Photoshop
+Last update: 2020/09/09
+Standards: HTML5, CSS3
+Sources: TypeKit, Bensound
+Software: Atom, Tower, Chrome, Lighthouse, Slack
