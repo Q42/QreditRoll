@@ -5,7 +5,6 @@
 html, body {
   background-color: transparent;
 }
-
 body {
   color: #FFF;
   overflow: hidden;
@@ -16,30 +15,9 @@ body {
   opacity: 0;
   transition: background-color 2s, opacity 2s;
 }
-
 body.active {
   opacity: 1;
   background-color: #000;
-}
-
-
-#qredits {
- width: 100%;
- text-align: center;
- transform: translateY(100vh);
-}
-
-body.active #qredits {
-  transform: translateY(-100%);
-}
-
-h2 {
-  margin-top: 1em;
-  font-weight: 800;
-  font-size: 200%;
-}
-h2:first-child {
-  margin-top: 0;
 }
 
 #close {
@@ -58,4 +36,38 @@ h2:first-child {
 #close:hover {
   opacity: 1;
   transform: scale(1.1);
+}
+
+#qredits {
+ width: 100%;
+ text-align: center;
+ transform: translateY(100vh);
+}
+body.active #qredits {
+  transform: translateY(-100%);
+}
+
+#qreditRollQredits {
+  margin-top: 6em;
+}
+
+h2 {
+  margin-top: 1em;
+  font-weight: 800;
+  font-size: 200%;
+}
+h2:first-child {
+  margin-top: 0;
+}
+
+a {
+  color: #FFF;
+}
+a:hover {
+  text-decoration: none;
+}
+
+#q42-logo {
+  margin: 1em 0;
+  height: 4.2em;
 }

@@ -1,4 +1,4 @@
-QreditRollInstance = function() {
+const QreditRoll = new function() {
   let clientDomain = null;
   let client = null;
 
@@ -9,6 +9,7 @@ QreditRollInstance = function() {
 
   let frame = document.createElement('iframe');
   frame.id = 'qreditrollframe';
+  frame.title = 'QreditRoll';
   frame.src = `${clientDomain}?hostDomain=${encodeURI(window.location.origin)}`;
   frame.allowtransparancy = 'true';
   frame.allow = 'autoplay';
@@ -81,6 +82,4 @@ QreditRollInstance = function() {
                   overflow: hidden;
                   `;
   }
-};
-
-const QreditRoll = new QreditRollInstance();
+}();

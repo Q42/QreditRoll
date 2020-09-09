@@ -1,32 +1,17 @@
-let qredits = '';
 let hostDomain = '';
 let lines = 0;
 let timeout = null;
+let humansTxtLoaded = false;
 
 document.addEventListener('DOMContentLoaded', (event) => {
-  const url = new URL(window.location.href);
-  const params = new URLSearchParams(url.search);
-
-  if (params.has('hostDomain')) {
-    hostDomain = decodeURI(params.get('hostDomain') || '');
-    if (hostDomain.endsWith('/')) {
-      hostDomain = hostDomain.slice(0, -1);
-    }
-    const humansTxtUrl = `${hostDomain}/humans.txt`; //https://cors-anywhere.herokuapp.com/${hostDomain}/humans.txt`;
-    const xhttp = new XMLHttpRequest();
-
-    xhttp.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        handleHumansTxt(xhttp.responseText);
-      }
-    };
-    xhttp.open('GET', humansTxtUrl);
-    xhttp.send();
-  }
-
   document.getElementById('close').addEventListener('click', (event) => {
     stopQreditRoll();
   })
+  document.getElementById('qredits').addEventListener('transitionend', (event) => {
+    timeout = setTimeout(stopQreditRoll, 2000);
+  });
+
+  initQreditRoll();
 });
 
 window.addEventListener('message', (event) => {
@@ -43,7 +28,42 @@ window.addEventListener('message', (event) => {
   };
 });
 
-function handleHumansTxt(humansTxt) {
+function initQreditRoll() {
+  const url = new URL(window.location.href);
+  const params = new URLSearchParams(url.search);
+
+  if (!params.has('hostDomain')) {
+    console.error('Cannot determine domain of host page');
+    return;
+  }
+
+  hostDomain = decodeURI(params.get('hostDomain'));
+  if (hostDomain.endsWith('/')) {
+    hostDomain = hostDomain.slice(0, -1);
+  }
+  let humansTxtUrl = `https://cors-anywhere.herokuapp.com/${hostDomain}/humans.txt`;
+  if (hostDomain.indexOf('//localhost') > -1) {
+    humansTxtUrl = `${hostDomain}/humans.txt`;
+  }
+
+  const xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4) {
+      if (this.status == 200) {
+        const qredits = convertHumansTxtToHtml(xhttp.responseText);
+        const humansTxtEl = document.getElementById('humansTxtQredits');
+        humansTxtEl.innerHTML = qredits;
+      } else {
+        console.error('Cannot retrieve humans.txt', xhttp);
+      }
+    }
+  };
+  xhttp.open('GET', humansTxtUrl);
+  xhttp.send();
+}
+
+function convertHumansTxtToHtml(humansTxt) {
+  let html = '';
   humansTxt.split("\n").forEach((line, index, arr) => {
     if (index === arr.length - 1 && line === "") {
       return;
@@ -52,31 +72,33 @@ function handleHumansTxt(humansTxt) {
     lines++;
 
     if (line.indexOf('/*') > -1 && line.indexOf('*/') > -1) {
-      qredits += line.replace('/*', '<h2>').replace('*/', '</h2>');
+      html += line.replace('/*', '<h2>').replace('*/', '</h2>');
     } else if (line.length > 0) {
-      qredits += `<p>${line}</p>`;
+      html += `<p>${line}</p>`;
     } else {
-      qredits += '</br>';
+      html += '<br>';
     }
   });
+
+  humansTxtLoaded = true;
+
+  return html;
 }
 
 function startQreditRoll() {
-  // TODO check if humans.txt loaded successfully
+  if (!humansTxtLoaded) {
+    setTimeout(startQreditRoll, 100);
+    return;
+  }
 
   const player = document.getElementById('player');
   player.volume = 1;
   player.play();
 
   const qreditsEl = document.getElementById('qredits');
-  qreditsEl.innerHTML = qredits;
   qreditsEl.style.transition = `transform ${lines}s linear 2s`;
 
   document.body.classList.add('active');
-
-  timeout = setTimeout(function() {
-    stopQreditRoll();
-  }, (lines + 4) * 1000);
 }
 
 function stopQreditRoll() {
