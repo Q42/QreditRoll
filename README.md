@@ -1,4 +1,4 @@
-# QreditRoll
+# QreditRoll - an epic credit roll for websites
 
 Hello website creator! If you are proud of your work, it should carry your name. And the names of everyone else on the team.
 
