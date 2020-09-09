@@ -1,11 +1,10 @@
 const QreditRoll = new function() {
-  let clientDomain = null;
-  let client = null;
-
-  const scriptEl = document.querySelector('script[src*="/qreditroll.js"]');
-  if (scriptEl) {
-    clientDomain = scriptEl.src.replace('/qreditroll.js', '');
+  const scriptEl = document.querySelector('script[src*="qreditroll.js"]');
+  if (!scriptEl) {
+    console.error('Cannot determine domain of QreditRoll script');
+    return;
   }
+  const clientDomain = scriptEl.src.replace('/qreditroll.js', '');
 
   let frame = document.createElement('iframe');
   frame.id = 'qreditrollframe';
@@ -23,7 +22,7 @@ const QreditRoll = new function() {
                 overflow: hidden;
                 `;
   document.body.appendChild(frame);
-  client = document.getElementById(frame.id).contentWindow;
+  const client = document.getElementById(frame.id).contentWindow;
 
   const allowedKeys = { 37: 'left', 38: 'up', 39: 'right', 40: 'down', 65: 'a', 66: 'b' };
   const konamiCode = ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'];
