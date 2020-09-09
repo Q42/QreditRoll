@@ -1,32 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Qredit Roll</title>
+  <title>QreditRoll Test Page</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="These are the heroes that made this web application into reality">
+  <meta name="description" content="QreditRoll celebrates the heroes that made the web application into reality">
   <meta name="author" content="Q42">
-  <link rel="preconnect" href="https://use.typekit.net/">
-  <link rel="preconnect" href="https://www.bensound.com/">
-  <link type="text/plain" rel="author" href="humans.txt" />
-  <link rel="stylesheet" href="https://use.typekit.net/bml4qlh.css">
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <button id="close">X</button>
-  <section id="qredits">
-    <div id="humansTxtQredits"></div>
-    <div id="qreditRollQredits">
-      <h2>QreditRoll</h2>
-      <p>Created by: Chris Waalberg from Q42</p>
-      <p>Website: q42.com</p>
-      <p>Email: chris@q42.com</p>
-      <img src="q42-logo-white.svg" id="q42-logo">
-      <p>Music: Funny Song from <a href="https://www.bensound.com/">Bensound.com</a></p>
-    </div>
-  </section>
-  <!-- TODO for some reason the loading of the page freezes when we try to load this mp3 from localhost -->
-  <audio id="player" preload="auto" src="https://www.bensound.com/bensound-music/bensound-funnysong.mp3"></audio>
-  <script src="app.js"></script>
+  <h1>Hi!</h1>
+  <p>Enter the Konami code or hit the button below.</p>
+  <button onclick="QreditRoll.start();">Button</button>
+  <p>For more info, see <a href="https://github.com/Q42/QreditRoll">https://github.com/Q42/QreditRoll</a>.</p>
+  <script src="qreditroll.js"></script>
 </body>
 </html>

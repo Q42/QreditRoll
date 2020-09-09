@@ -9,7 +9,7 @@ const QreditRoll = new function() {
   let frame = document.createElement('iframe');
   frame.id = 'qreditrollframe';
   frame.title = 'QreditRoll';
-  frame.src = `${clientDomain}?hostDomain=${encodeURI(window.location.origin)}`;
+  frame.src = `${clientDomain}/qreditroll.html?hostDomain=${encodeURI(window.location.origin)}`;
   frame.allowtransparancy = 'true';
   frame.allow = 'autoplay';
   frame.style = `
