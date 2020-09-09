@@ -9,7 +9,7 @@ Make it epic, use QreditRoll.
 ## How to run it yourself
 Just spin up a simple webserver, like `python -m SimpleHTTPServer 8000`.
 
-Go to http://localhost:8000/test.html.
+Go to http://localhost:8000/.
 
 ## How to implement
 Include the QreditRoll script at the end of the `body` element of your website.
