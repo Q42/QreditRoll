@@ -12,7 +12,7 @@ It's all static files, so just spin up a simple webserver, like `python -m Simpl
 ## How to implement
 Include the QreditRoll script at the end of the `body` element of your website.
 
-`<script src="https://qreditroll.com/qreditroll.js"></script>`
+`<script src="https://www.qreditroll.com/qreditroll.js"></script>`
 
 Make sure you have a `humans.txt` file, like explained on http://humanstxt.org/.
 
