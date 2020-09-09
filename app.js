@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     stopQreditRoll();
   })
   document.getElementById('qredits').addEventListener('transitionend', (event) => {
-    timeout = setTimeout(stopQreditRoll, 2000);
+    timeout = setTimeout(stopQreditRoll, 1000);
   });
 
   initQreditRoll();
