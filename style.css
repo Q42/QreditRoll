@@ -19,6 +19,11 @@ body.active {
   opacity: 1;
   background-color: #000;
 }
+body.scrolling {
+  background-image: url('videotape.gif');
+  background-size: 100vw 100vh;
+  background-repeat: none;
+}
 
 #close {
   border: none;
@@ -45,6 +50,9 @@ body.active {
 }
 body.active #qredits {
   transform: translateY(-100%);
+}
+body.scrolling #qredits {
+  opacity: .7;
 }
 
 #qreditRollQredits {
