@@ -19,12 +19,92 @@
   <meta property="og:availability" content="instock">
   <meta name="author" content="Q42">
   <link type="text/plain" rel="author" href="humans.txt">
+  <link rel="stylesheet" href="https://use.typekit.net/bml4qlh.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      margin: 10% 20%;
+      max-width: 600px;
+      background: #FFCC00;
+      color: #231900;
+      font-family: proxima-nova, sans-serif;
+      font-weight: 400;
+      font-style: normal;
+      font-size: 120%;
+    }
+
+    h1 {
+      font-size: 250%;
+      line-height: 1;
+    }
+
+    h1 strong {
+      display: block;
+      font-size: 300%;
+      font-weight: 800;
+      line-height: 0.8;
+    }
+
+    p {
+      padding-top: 1em;
+    }
+
+    strong {
+      font-size: 150%;
+      font-weight: 400;
+    }
+
+    button {
+      margin-top: 1em;
+      padding: .6em 3em;
+      border: none;
+      background-color: #FFCC00;
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 4px;
+      font-size: 100%;
+      font-weight: 800;
+      transition: transform .1s;
+      cursor: pointer;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    a {
+      color: #000;
+      font-weight: 600;
+      font-style: italic;
+      text-decoration: none;
+      border-bottom: 2px solid red;
+      transition: padding 0.1s;
+    }
+    a:hover {
+      padding-bottom: 2px;
+    }
+
+    @media only screen and (max-width: 600px) {
+      body {
+        margin: 10% 5%;
+        font-size: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Hi!</h1>
-  <p>Enter the Konami code or hit the button below.</p>
+  <h1><strong>Hello</strong> website creator!</h1>
+  <p><strong>Is your work at least as cool as a movie?<br>Of course it is!</strong></p>
+  <p><strong>Are you proud of your work?<br>Of course you are!</strong></p>
+  <p><strong>Well, your work should carry your name then. You and your team should get your own epic credit roll! You deserve it! Your hard work demands it!</strong></p>
+  <p><strong>Make it epic, use QreditRoll.</strong></p>
+  <p>Try it out, enter the Konami code or hit the button below.</p>
   <button onclick="QreditRoll.start();">Button</button>
-  <p>For more info, see <a href="https://github.com/Q42/QreditRoll">https://github.com/Q42/QreditRoll</a>.</p>
+  <p>And you know what makes this even more awesome? The credits are based on your humans.txt. Make sure you have one, like explained on <a href="http://humanstxt.org/">http://humanstxt.org/</a>.</p>
+  <p>Convinced? Visit GitHub for implementation details: <a href="https://github.com/Q42/QreditRoll">https://github.com/Q42/QreditRoll</a>.</p>
   <script src="qreditroll.js"></script>
 </body>
 </html>
