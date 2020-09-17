@@ -95,6 +95,11 @@ function stopQreditRoll() {
 
   document.body.classList.remove('active');
 
+  setTimeout(() => {
+    qreditsEl.style.transition = '';
+    qreditsEl.style.transform = '';
+  }, 2000);
+
   let vol = 1;
   const fadeout = setInterval(function() {
     if (vol > 0) {

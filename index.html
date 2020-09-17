@@ -27,7 +27,7 @@
     }
 
     body {
-      margin: 1em 20% 6em 20%;
+      margin: 1em 20%;
       max-width: 600px;
       background: #FFCC00;
       color: #231900;
@@ -93,9 +93,16 @@
       padding-bottom: 2px;
     }
 
+    footer {
+      font-size: 100%;
+      margin-top: 6em;
+      font-style: italic;
+      font-weight: 600;
+    }
+
     @media only screen and (max-width: 600px) {
       body {
-        margin: 1em 5% 6em 5%;
+        margin: 1em 5%;
         font-size: 100%;
       }
     }
@@ -112,6 +119,7 @@
   <button onclick="QreditRoll.start();">Button</button>
   <p>And you know what makes this even more awesome? The credits are based on your humans.txt. Make sure you have one, like explained on <a href="http://humanstxt.org/">http://humanstxt.org/</a>.</p>
   <p>Convinced? Visit GitHub for implementation details: <a href="https://github.com/Q42/QreditRoll">https://github.com/Q42/QreditRoll</a>.</p>
+  <footer>QreditRoll is brought to you by <a href="https://q42.com">Q42</a></footer>
   <script src="qreditroll.js"></script>
 </body>
 </html>
