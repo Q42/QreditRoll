@@ -20,9 +20,9 @@ Include the QreditRoll script at the end of the `body` element of your website.
 
 `<script src="https://www.qreditroll.com/qreditroll.js"></script>`
 
-Make sure you have a `humans.txt` file, like explained on http://humanstxt.org/.
+Make sure you have a `humans.txt` file, like explained on http://humanstxt.org/. QreditRoll will display your `humans.txt` in awesome credit roll fashion, with epic background music.
 
-QreditRoll will display your `humans.txt` in awesome credit roll fashion, with epic background music.
+The credit roll is triggered by the Konami code or if you call `QreditRoll.start();` yourself, on a button click for example. If you choose to only use the Konami code, you might want to drop a hint in your source code.
 
 ## How do I run this myself?
 It's all static files, so just spin up a simple webserver, like `python -m SimpleHTTPServer 8000`, and go to http://localhost:8000/.
