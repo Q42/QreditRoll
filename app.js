@@ -31,7 +31,7 @@ function initQreditRoll() {
     hostDomain = hostDomain.slice(0, -1);
   }
   let humansTxtUrl = `https://cors-anywhere.herokuapp.com/${hostDomain}/humans.txt`;
-  if (hostDomain.indexOf('//localhost') > -1) {
+  if (hostDomain.indexOf('//localhost') > -1 || hostDomain.indexOf('qreditroll.com') > -1) {
     humansTxtUrl = `${hostDomain}/humans.txt`;
   }
 
