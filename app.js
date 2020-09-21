@@ -6,18 +6,12 @@ let humansTxtLoaded = false;
 let creditsEl = null;
 let audioPlayer = null;
 
-document.addEventListener('DOMContentLoaded', initQreditRoll);
+document.addEventListener('DOMContentLoaded', ready);
 document.body.addEventListener("mousewheel", scrollHandler, { passive: false }); // IE9, Chrome, Safari, Opera
 document.body.addEventListener("DOMMouseScroll", scrollHandler, { passive: false }); // Firefox
 window.addEventListener('message', handleMessage);
 
-function initQreditRoll() {
-  document.getElementById('close').addEventListener('click', stopQreditRoll);
-  qreditsEl = document.getElementById('qredits');
-  qreditsEl.addEventListener('transitionend', (event) => {
-    stopTimeout = setTimeout(stopQreditRoll, 1000);
-  });
-
+function ready() {
   const url = new URL(window.location.href);
   const params = new URLSearchParams(url.search);
 
@@ -30,25 +24,20 @@ function initQreditRoll() {
   if (hostDomain.endsWith('/')) {
     hostDomain = hostDomain.slice(0, -1);
   }
-  let humansTxtUrl = `https://cors-anywhere.herokuapp.com/${hostDomain}/humans.txt`;
-  if (hostDomain.indexOf('//localhost') > -1 || hostDomain.indexOf('qreditroll.com') > -1) {
-    humansTxtUrl = `${hostDomain}/humans.txt`;
-  }
 
-  const xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4) {
-      if (this.status == 200) {
-        const qredits = convertHumansTxtToHtml(xhttp.responseText);
-        const humansTxtEl = document.getElementById('humansTxtQredits');
-        humansTxtEl.innerHTML = qredits;
-      } else {
-        console.error('Cannot retrieve humans.txt', xhttp);
-      }
-    }
-  };
-  xhttp.open('GET', humansTxtUrl);
-  xhttp.send();
+  parent.postMessage({ type: 'ready' }, hostDomain);
+}
+
+function init(humansTxt) {
+  document.getElementById('close').addEventListener('click', stopQreditRoll);
+  qreditsEl = document.getElementById('qredits');
+  qreditsEl.addEventListener('transitionend', (event) => {
+    stopTimeout = setTimeout(stopQreditRoll, 1000);
+  });
+
+  const qredits = convertHumansTxtToHtml(humansTxt);
+  const humansTxtEl = document.getElementById('humansTxtQredits');
+  humansTxtEl.innerHTML = qredits;
 }
 
 function convertHumansTxtToHtml(humansTxt) {
@@ -162,6 +151,9 @@ function scrollHandler(event) {
 function handleMessage() {
   if (hostDomain && event.origin.startsWith(hostDomain)) {
     switch (event.data.type) {
+      case 'passHumansTxt':
+        init(event.data.humansTxt);
+        break;
       case 'startQreditRoll':
         startQreditRoll();
         break;

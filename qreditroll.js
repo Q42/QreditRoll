@@ -1,63 +1,80 @@
 const QreditRoll = new function() {
-  const scriptEl = document.querySelector('script[src*="qreditroll.js"]');
-  if (!scriptEl) {
-    console.error('Cannot determine domain of QreditRoll script');
-    return;
-  }
-  const clientDomain = scriptEl.src.replace('/qreditroll.js', '');
+  fetch('/humans.txt', {
+    method: 'GET',
+    mode: 'same-origin',
+    cache: 'no-cache',
+    credentials: 'same-origin',
+    referrerPolicy: 'same-origin'
+  }).then(response => {
+    response.text().then(data => this.init(data));
+  });
 
-  let frame = document.createElement('iframe');
-  frame.id = 'qreditrollframe';
-  frame.title = 'QreditRoll';
-  frame.src = `${clientDomain}/qreditroll.html?hostDomain=${encodeURI(window.location.origin)}`;
-  frame.allowtransparancy = 'true';
-  frame.allow = 'autoplay';
-  frame.style = `
-                border: none;
-                position: fixed;
-                width: 1px;
-                height: 1px;
-                top: 0;
-                right: 0;
-                overflow: hidden;
-                `;
-  document.body.appendChild(frame);
-  const client = document.getElementById(frame.id).contentWindow;
+  this.init = function(humansTxt) {
+    //TODO check if humansTxt isn't empty
 
-  const allowedKeys = { 37: 'left', 38: 'up', 39: 'right', 40: 'down', 65: 'a', 66: 'b' };
-  const konamiCode = ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'];
-  let konamiCodePosition = 0;
+    const scriptEl = document.querySelector('script[src*="qreditroll.js"]');
+    if (!scriptEl) {
+      console.error('Cannot determine domain of QreditRoll script');
+      return;
+    }
+    this.clientDomain = scriptEl.src.replace('/qreditroll.js', '');
 
-  document.addEventListener('keydown', (e) => {
-    var key = allowedKeys[e.keyCode];
-    var requiredKey = konamiCode[konamiCodePosition];
-    if (key == requiredKey) {
-      konamiCodePosition++;
-      if (konamiCodePosition == konamiCode.length) {
-        this.start();
+    this.frame = document.createElement('iframe');
+    this.frame.id = 'qreditrollframe';
+    this.frame.title = 'QreditRoll';
+    this.frame.src = `${this.clientDomain}/qreditroll.html?hostDomain=${encodeURI(window.location.origin)}`;
+    this.frame.allowtransparancy = 'true';
+    this.frame.allow = 'autoplay';
+    this.frame.style = `
+                  border: none;
+                  position: fixed;
+                  width: 1px;
+                  height: 1px;
+                  top: 0;
+                  right: 0;
+                  overflow: hidden;
+                  `;
+    document.body.appendChild(this.frame);
+    this.client = document.getElementById(this.frame.id).contentWindow;
+
+    const allowedKeys = { 37: 'left', 38: 'up', 39: 'right', 40: 'down', 65: 'a', 66: 'b' };
+    const konamiCode = ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'];
+    let konamiCodePosition = 0;
+
+    document.addEventListener('keydown', (e) => {
+      var key = allowedKeys[e.keyCode];
+      var requiredKey = konamiCode[konamiCodePosition];
+      if (key == requiredKey) {
+        konamiCodePosition++;
+        if (konamiCodePosition == konamiCode.length) {
+          this.start();
+          konamiCodePosition = 0;
+        }
+      } else {
         konamiCodePosition = 0;
       }
-    } else {
-      konamiCodePosition = 0;
-    }
-  });
+    });
 
-  window.addEventListener('message', (event) => {
-    if (event.origin.startsWith(clientDomain)) {
-      switch (event.data.type) {
-        case 'stopQreditRoll':
-          this.stop();
-          break;
-        default:
-          if (!event.data.source || event.data.source.indexOf('vue-devtools') == -1) {
-            console.log('messagehandler -> function not found:', event.data.type);
-          }
-      }
-    };
-  });
+    window.addEventListener('message', (event) => {
+      if (event.origin.startsWith(this.clientDomain)) {
+        switch (event.data.type) {
+          case 'ready':
+            this.client.postMessage({ type: 'passHumansTxt', humansTxt: humansTxt }, this.clientDomain);
+            break;
+          case 'stopQreditRoll':
+            this.stop();
+            break;
+          default:
+            if (!event.data.source || event.data.source.indexOf('vue-devtools') == -1) {
+              console.log('messagehandler -> function not found:', event.data.type);
+            }
+        }
+      };
+    });
+  }
 
   this.start = function() {
-    frame.style = `
+    this.frame.style = `
                   border: none;
                   position: fixed;
                   width: 100vw;
@@ -67,11 +84,11 @@ const QreditRoll = new function() {
                   overflow: hidden;
                   `;
 
-    client.postMessage({ type: 'startQreditRoll' }, clientDomain);
+    this.client.postMessage({ type: 'startQreditRoll' }, this.clientDomain);
   };
 
   this.stop = function() {
-    frame.style = `
+    this.frame.style = `
                   border: none;
                   position: fixed;
                   width: 1px;
