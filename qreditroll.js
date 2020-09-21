@@ -28,6 +28,7 @@ const QreditRoll = new function() {
     this.frame.style = `
                   border: none;
                   position: fixed;
+                  z-index: 999999999;
                   width: 1px;
                   height: 1px;
                   top: 0;
@@ -77,6 +78,7 @@ const QreditRoll = new function() {
     this.frame.style = `
                   border: none;
                   position: fixed;
+                  z-index: 999999999;
                   width: 100vw;
                   height: 100vh;
                   top: 0;
