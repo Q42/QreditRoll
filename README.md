@@ -13,15 +13,15 @@ Well, your work should carry your name then. You and your team should get your o
 Make it epic, use QreditRoll.
 
 ## Can I see a demo?
-Yes, you can! Check it out: https://www.qreditroll.com/
+Yes, you can! Check it out: https://qreditroll.com/
 
 ## How do I implement this?
 Include the QreditRoll script at the end of the `body` element of your website.
 
-`<script src="https://www.qreditroll.com/qreditroll.js"></script>`
+`<script src="https://qreditroll.com/qreditroll.js"></script>`
 
-If your website has a Content-Security-Policy, make sure to add `www.qreditroll.com` to the allowed origins. QreditRoll uses an iframe to show the credits, so you will need to add a frame segment as well. Your Content-Security-Policy might look like this:
-`default-src 'self'; connect-src 'self' www.qreditroll.com; script-src 'self' www.qreditroll.com; frame-src www.qreditroll.com;`
+If your website has a Content-Security-Policy, make sure to add `qreditroll.com` to the allowed origins. QreditRoll uses an iframe to show the credits, so you will need to add a frame segment as well. Your Content-Security-Policy might look like this:
+`default-src 'self'; connect-src 'self' qreditroll.com; script-src 'self' qreditroll.com; frame-src qreditroll.com;`
 
 Make sure you have a `humans.txt` file, like explained on http://humanstxt.org/. QreditRoll will display your `humans.txt` in awesome credit roll fashion, with epic background music.
 
