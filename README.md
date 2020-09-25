@@ -16,7 +16,7 @@ Make it epic, use QreditRoll.
 Yes, you can! Check it out: https://qreditroll.com/
 
 ## How do I implement this?
-Include the QreditRoll script at the end of the `body` element of your website.
+Include the QreditRoll script at the end of the `body` element of your website. (Make sure to use https.)
 
 `<script src="https://qreditroll.com/qreditroll.js"></script>`
 
