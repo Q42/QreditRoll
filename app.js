@@ -3,7 +3,7 @@ let lines = 0;
 let stopTimeout = null;
 let scrollTimeout = null;
 let humansTxtLoaded = false;
-let creditsEl = null;
+let qreditsEl = null;
 let audioPlayer = null;
 
 document.addEventListener('DOMContentLoaded', ready);
