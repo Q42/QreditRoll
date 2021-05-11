@@ -26,6 +26,8 @@ function ready() {
   }
 
   parent.postMessage({ type: 'ready' }, hostDomain);
+
+  console.log('ready');
 }
 
 function init(humansTxt) {
@@ -112,6 +114,7 @@ function stopQreditRoll() {
 function setQreditsTransition(fast, delayed) {
   const y = parseInt(getTranslateValues(qreditsEl).y);
   const height = parseInt(window.getComputedStyle(qreditsEl).height.replace('px', ''));
+  console.log('height', height);
   const distanceLeft = height + y;
   const speedFactor = fast ? 15 : 1;
 
