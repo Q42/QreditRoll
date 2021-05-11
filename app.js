@@ -6,7 +6,7 @@ let humansTxtLoaded = false;
 let qreditsEl = null;
 let audioPlayer = null;
 
-window.addEventListener('load', ready);
+document.addEventListener('DOMContentLoaded', ready);
 document.body.addEventListener("mousewheel", scrollHandler, { passive: false }); // IE9, Chrome, Safari, Opera
 document.body.addEventListener("DOMMouseScroll", scrollHandler, { passive: false }); // Firefox
 window.addEventListener('message', handleMessage);
@@ -26,8 +26,6 @@ function ready() {
   }
 
   parent.postMessage({ type: 'ready' }, hostDomain);
-
-  console.log('ready');
 }
 
 function init(humansTxt) {
@@ -71,6 +69,8 @@ function startQreditRoll() {
     return;
   }
 
+  // This timeout gives the browser time to render the original transform property correctly,
+  // before changing it in setQreditsTransition
   setTimeout(function() {
     audioPlayer = document.getElementById('player');
     audioPlayer.volume = 1;
@@ -116,7 +116,6 @@ function stopQreditRoll() {
 function setQreditsTransition(fast, delayed) {
   const y = parseInt(getTranslateValues(qreditsEl).y);
   const height = parseInt(window.getComputedStyle(qreditsEl).height.replace('px', ''));
-  console.log('height', height);
   const distanceLeft = height + y;
   const speedFactor = fast ? 15 : 1;
 
