@@ -71,13 +71,15 @@ function startQreditRoll() {
     return;
   }
 
-  audioPlayer = document.getElementById('player');
-  audioPlayer.volume = 1;
-  audioPlayer.play();
+  setTimeout(function() {
+    audioPlayer = document.getElementById('player');
+    audioPlayer.volume = 1;
+    audioPlayer.play();
 
-  setQreditsTransition(false, true);
+    setQreditsTransition(false, true);
 
-  document.body.classList.add('active');
+    document.body.classList.add('active');
+  }, 10);
 }
 
 function stopQreditRoll() {
