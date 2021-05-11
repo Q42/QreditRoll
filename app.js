@@ -6,7 +6,7 @@ let humansTxtLoaded = false;
 let qreditsEl = null;
 let audioPlayer = null;
 
-document.addEventListener('DOMContentLoaded', ready);
+window.addEventListener('load', ready);
 document.body.addEventListener("mousewheel", scrollHandler, { passive: false }); // IE9, Chrome, Safari, Opera
 document.body.addEventListener("DOMMouseScroll", scrollHandler, { passive: false }); // Firefox
 window.addEventListener('message', handleMessage);
