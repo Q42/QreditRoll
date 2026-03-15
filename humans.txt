@@ -105,4 +105,4 @@ Wouter
 Last update: 2026/03/15
 Standards: HTML5, CSS3
 Sources: TypeKit, Bensound
-Software: Atom, Tower, Chrome, Lighthouse, Slack
+Software: Atom, Tower, Chrome, Lighthouse, Slack, Claude Code
