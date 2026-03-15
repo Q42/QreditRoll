@@ -7,7 +7,6 @@ let qreditsEl = null;
 let audioPlayer = null;
 
 document.addEventListener('DOMContentLoaded', ready);
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') stopQreditRoll(); });
 document.body.addEventListener("mousewheel", scrollHandler, { passive: false }); // IE9, Chrome, Safari, Opera
 document.body.addEventListener("DOMMouseScroll", scrollHandler, { passive: false }); // Firefox
 window.addEventListener('message', handleMessage);
@@ -161,6 +160,9 @@ function handleMessage(event) {
         break;
       case 'startQreditRoll':
         startQreditRoll();
+        break;
+      case 'stopQreditRoll':
+        stopQreditRoll();
         break;
       default:
         if (!event.data.source || event.data.source.indexOf('vue-devtools') == -1) {

@@ -11,6 +11,7 @@ const QreditRoll = new function() {
     this.clientDomain = scriptEl.src.replace('/qreditroll.js', '');
 
     this.addKonamiListener();
+    this.addEscapeListener();
 
     window.addEventListener('message', (event) => {
       if (event.origin.startsWith(this.clientDomain)) {
@@ -74,6 +75,14 @@ const QreditRoll = new function() {
                   `;
       document.body.appendChild(this.frame);
       this.client = document.getElementById(this.frame.id).contentWindow;
+    });
+  }
+
+  this.addEscapeListener = function() {
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.frame) {
+        this.client.postMessage({ type: 'stopQreditRoll' }, this.clientDomain);
+      }
     });
   }
 
