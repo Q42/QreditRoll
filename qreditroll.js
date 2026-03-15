@@ -1,17 +1,8 @@
 const QreditRoll = new function() {
-  fetch('/humans.txt', {
-    method: 'GET',
-    mode: 'same-origin',
-    cache: 'no-cache',
-    credentials: 'same-origin',
-    referrerPolicy: 'same-origin'
-  }).then(response => {
-    response.text().then(data => this.init(data));
-  });
+  this.humansTxt = null;
+  this.frameReady = null;
 
-  this.init = function(humansTxt) {
-    //TODO check if humansTxt isn't empty
-
+  this.init = function() {
     const scriptEl = document.querySelector('script[src*="qreditroll.js"]');
     if (!scriptEl) {
       console.error('Cannot determine domain of QreditRoll script');
@@ -25,7 +16,7 @@ const QreditRoll = new function() {
       if (event.origin.startsWith(this.clientDomain)) {
         switch (event.data.type) {
           case 'ready':
-            this.client.postMessage({ type: 'passHumansTxt', humansTxt: humansTxt }, this.clientDomain);
+            this.client.postMessage({ type: 'passHumansTxt', humansTxt: this.humansTxt }, this.clientDomain);
             break;
           case 'stopQreditRoll':
             this.stop();
@@ -39,19 +30,39 @@ const QreditRoll = new function() {
     });
   }
 
-  this.createIFrame = function() {
-    this.frame = document.createElement('iframe');
-
-    this.frame.onload = () => {
-      this.frameLoaded = true;
+  this.fetchHumansTxt = function() {
+    if (this.humansTxt !== null) {
+      return Promise.resolve(this.humansTxt);
     }
 
-    this.frame.id = 'qreditrollframe';
-    this.frame.title = 'QreditRoll';
-    this.frame.src = `${this.clientDomain}/qreditroll.html?hostDomain=${encodeURI(window.location.origin)}`;
-    this.frame.allowtransparancy = 'true';
-    this.frame.allow = 'autoplay';
-    this.frame.style = `
+    return fetch('/humans.txt', {
+      method: 'GET',
+      mode: 'same-origin',
+      cache: 'no-cache',
+      credentials: 'same-origin',
+      referrerPolicy: 'same-origin'
+    }).then(response => response.text()).then(data => {
+      if (!data || !data.trim()) {
+        console.warn('QreditRoll: humans.txt is empty');
+        return null;
+      }
+      this.humansTxt = data;
+      return data;
+    }).catch(err => {
+      console.warn('QreditRoll: could not load humans.txt', err);
+      return null;
+    });
+  }
+
+  this.createIFrame = function() {
+    this.frameReady = new Promise((resolve) => {
+      this.frame = document.createElement('iframe');
+      this.frame.onload = () => resolve();
+      this.frame.id = 'qreditrollframe';
+      this.frame.title = 'QreditRoll';
+      this.frame.src = `${this.clientDomain}/qreditroll.html?hostDomain=${encodeURI(window.location.origin)}`;
+      this.frame.allow = 'autoplay';
+      this.frame.style.cssText = `
                   border: none;
                   position: fixed;
                   z-index: 999999999;
@@ -61,8 +72,9 @@ const QreditRoll = new function() {
                   right: 0;
                   overflow: hidden;
                   `;
-    document.body.appendChild(this.frame);
-    this.client = document.getElementById(this.frame.id).contentWindow;
+      document.body.appendChild(this.frame);
+      this.client = document.getElementById(this.frame.id).contentWindow;
+    });
   }
 
   this.addKonamiListener = function() {
@@ -90,12 +102,11 @@ const QreditRoll = new function() {
       this.createIFrame();
     }
 
-    if (!this.frameLoaded) {
-      setTimeout(() => { this.start() }, 100);
-      return;
-    }
+    this.fetchHumansTxt().then(humansTxt => {
+      if (!humansTxt) return;
 
-    this.frame.style = `
+      return this.frameReady.then(() => {
+        this.frame.style.cssText = `
                   border: none;
                   position: fixed;
                   z-index: 999999999;
@@ -106,7 +117,9 @@ const QreditRoll = new function() {
                   overflow: hidden;
                   `;
 
-    this.client.postMessage({ type: 'startQreditRoll' }, this.clientDomain);
+        this.client.postMessage({ type: 'startQreditRoll' }, this.clientDomain);
+      });
+    });
   };
 
   this.stop = function() {
@@ -114,19 +127,19 @@ const QreditRoll = new function() {
       return;
     }
 
-    if (!this.frameLoaded) {
-      setTimeout(() => { this.stop() }, 100);
-      return;
-    }
-
-    this.frame.style = `
+    this.frameReady.then(() => {
+      this.frame.style.cssText = `
                   border: none;
                   position: fixed;
+                  z-index: -1;
                   width: 1px;
                   height: 1px;
                   top: 0;
                   right: 0;
                   overflow: hidden;
                   `;
+    });
   }
+
+  this.init();
 }();

@@ -8,7 +8,7 @@ html, body {
 body {
   color: #FFF;
   overflow: hidden;
-  font-family: proxima-nova, sans-serif;
+  font-family: proxima-nova, 'Helvetica Neue', Arial, sans-serif;
   font-weight: 400;
   font-style: normal;
   font-size: 150%;
@@ -22,7 +22,7 @@ body.active {
 body.scrolling {
   background-image: url('videotape.gif');
   background-size: 100vw 100vh;
-  background-repeat: none;
+  background-repeat: no-repeat;
 }
 
 #close {

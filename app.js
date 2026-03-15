@@ -152,7 +152,7 @@ function scrollHandler(event) {
   }, 42);
 }
 
-function handleMessage() {
+function handleMessage(event) {
   if (hostDomain && event.origin.startsWith(hostDomain)) {
     switch (event.data.type) {
       case 'passHumansTxt':

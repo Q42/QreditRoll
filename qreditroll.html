@@ -25,8 +25,10 @@
       <p>Music: Funny Song from <a href="https://www.bensound.com/">Bensound.com</a></p>
     </div>
   </section>
-  <!-- TODO for some reason the loading of the page freezes when we try to load this mp3 from localhost -->
-  <audio id="player" preload="auto" src="https://www.bensound.com/bensound-music/bensound-funnysong.mp3"></audio>
+  <audio id="player" preload="auto">
+    <source src="bensound-funnysong.mp3" type="audio/mpeg">
+    <source src="https://www.bensound.com/bensound-music/bensound-funnysong.mp3" type="audio/mpeg">
+  </audio>
   <script src="\app.js"></script>
 </body>
 </html>
