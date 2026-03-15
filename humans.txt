@@ -102,7 +102,7 @@ Wouter
 Wouter
 
 /* SITE */
-Last update: 2020/09/09
+Last update: 2026/03/15
 Standards: HTML5, CSS3
 Sources: TypeKit, Bensound
 Software: Atom, Tower, Chrome, Lighthouse, Slack
