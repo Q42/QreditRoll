@@ -148,7 +148,7 @@ function scrollHandler(event) {
 }
 
 function handleMessage(event) {
-  if (hostDomain && event.origin.startsWith(hostDomain)) {
+  if (hostDomain && event.origin === hostDomain) {
     switch (event.data.type) {
       case 'passHumansTxt':
         init(event.data.humansTxt);
