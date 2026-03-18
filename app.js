@@ -4,7 +4,16 @@ let scrollTimeout = null;
 let notifyHumansTxtReady;
 const humansTxtReady = new Promise(resolve => { notifyHumansTxtReady = resolve; });
 let qreditsEl = null;
-let audioPlayer = null;
+
+// Web Audio API
+let audioContext = null;
+let audioBuffer = null;
+let audioBufferReversed = null;
+let audioSource = null;
+let gainNode = null;
+let audioStartContextTime = 0;
+let audioStartOffset = 0;
+let currentPlaybackRate = 1;
 
 document.addEventListener('DOMContentLoaded', ready);
 document.body.addEventListener("mousewheel", scrollHandler, { passive: false }); // IE9, Chrome, Safari, Opera
@@ -31,8 +40,12 @@ function ready() {
 function init(humansTxt) {
   document.getElementById('close').addEventListener('click', stopQreditRoll);
   qreditsEl = document.getElementById('qredits');
-  qreditsEl.addEventListener('transitionend', (event) => {
-    stopTimeout = setTimeout(stopQreditRoll, 1000);
+  qreditsEl.addEventListener('transitionend', () => {
+    const y = parseInt(getTranslateValues(qreditsEl).y);
+    const height = parseInt(window.getComputedStyle(qreditsEl).height);
+    if (height + y <= 0) {
+      stopTimeout = setTimeout(stopQreditRoll, 1000);
+    }
   });
 
   const humansTxtEl = document.getElementById('humansTxtQredits');
@@ -63,14 +76,99 @@ function convertHumansTxtToHtml(humansTxt) {
   return fragment;
 }
 
+async function initAudio() {
+  if (audioContext) {
+    gainNode.gain.cancelScheduledValues(audioContext.currentTime);
+    gainNode.gain.value = 1;
+    return;
+  }
+
+  audioContext = new AudioContext();
+  gainNode = audioContext.createGain();
+  gainNode.gain.value = 1;
+  gainNode.connect(audioContext.destination);
+
+  try {
+    const response = await fetch('bensound-funnysong.mp3');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const arrayBuffer = await response.arrayBuffer();
+    audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    audioBufferReversed = createReversedBuffer(audioBuffer);
+  } catch (err) {
+    console.warn('QreditRoll: audio failed to load', err);
+  }
+}
+
+function createReversedBuffer(buffer) {
+  const reversed = audioContext.createBuffer(
+    buffer.numberOfChannels,
+    buffer.length,
+    buffer.sampleRate
+  );
+  for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+    const data = buffer.getChannelData(channel);
+    const reversedData = reversed.getChannelData(channel);
+    for (let i = 0; i < buffer.length; i++) {
+      reversedData[i] = data[buffer.length - 1 - i];
+    }
+  }
+  return reversed;
+}
+
+function playAudio(offset, rate) {
+  if (!audioContext) return;
+
+  const reversed = rate < 0;
+  const buffer = reversed ? audioBufferReversed : audioBuffer;
+  if (!buffer) return;
+
+  stopAudioSource();
+
+  audioSource = audioContext.createBufferSource();
+  audioSource.buffer = buffer;
+  audioSource.playbackRate.value = Math.abs(rate);
+  audioSource.connect(gainNode);
+
+  // For reversed playback, map forward offset to position in the reversed buffer
+  const reversedOffset = reversed ? buffer.duration - offset : offset;
+  const clampedOffset = Math.max(0, Math.min(reversedOffset, buffer.duration));
+  audioStartContextTime = audioContext.currentTime;
+  audioStartOffset = offset;
+  currentPlaybackRate = rate;
+
+  audioSource.start(0, clampedOffset);
+}
+
+function stopAudioSource() {
+  if (audioSource) {
+    try { audioSource.stop(); } catch (e) {}
+    audioSource.disconnect();
+    audioSource = null;
+  }
+}
+
+function getCurrentAudioOffset() {
+  if (!audioContext || !audioBuffer) return 0;
+  const elapsed = audioContext.currentTime - audioStartContextTime;
+  return Math.max(0, Math.min(
+    audioStartOffset + elapsed * currentPlaybackRate,
+    audioBuffer.duration
+  ));
+}
+
+function setAudioPlaybackRate(rate) {
+  if (!audioBuffer || !audioContext) return;
+  if (rate === currentPlaybackRate && audioSource) return;
+  playAudio(getCurrentAudioOffset(), rate);
+}
+
 function startQreditRoll() {
   humansTxtReady.then(() => {
     // This timeout gives the browser time to render the original transform property correctly,
     // before changing it in setQreditsTransition
-    setTimeout(function() {
-      audioPlayer = document.getElementById('player');
-      audioPlayer.volume = 1;
-      audioPlayer.play().catch(err => console.warn('QreditRoll: audio playback failed', err));
+    setTimeout(async function() {
+      await initAudio();
+      playAudio(0, 1);
 
       setQreditsTransition(false, true);
 
@@ -90,24 +188,17 @@ function stopQreditRoll() {
     qreditsEl.style.transform = '';
   }, 2000);
 
-  let vol = 1;
-  const fadeout = setInterval(function() {
-    if (vol > 0) {
-      vol -= 0.05;
-      if (vol < 0) {
-        vol = 0;
-      }
-      audioPlayer.volume = vol;
-    }
-    else {
-      audioPlayer.pause();
-      audioPlayer.currentTime = 0;
-
+  if (gainNode && audioContext) {
+    const now = audioContext.currentTime;
+    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+    gainNode.gain.linearRampToValueAtTime(0, now + 1.6);
+    setTimeout(() => {
+      stopAudioSource();
       parent.postMessage({ type: 'stopQreditRoll' }, hostDomain);
-
-      clearInterval(fadeout);
-    }
-  }, 80);
+    }, 1600);
+  } else {
+    parent.postMessage({ type: 'stopQreditRoll' }, hostDomain);
+  }
 }
 
 function setQreditsTransition(fast, delayed) {
@@ -131,22 +222,40 @@ function setQreditsTransition(fast, delayed) {
 function scrollHandler(event) {
   event.preventDefault();
 
-  if (event.deltaY <= 0) {
-    return;
-  }
+  if (event.deltaY > 0) {
+    if (!document.body.classList.contains('scrolling')) {
+      document.body.classList.add('scrolling');
+      setQreditsTransition(true);
+    }
+    setAudioPlaybackRate(1.5);
 
-  if (!document.body.classList.contains('scrolling')) {
-    document.body.classList.add('scrolling');
-    setQreditsTransition(true);
-    if (audioPlayer) audioPlayer.playbackRate = 2;
-  }
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      document.body.classList.remove('scrolling');
+      setQreditsTransition(false);
+      setAudioPlaybackRate(1);
+    }, 42);
+  } else if (event.deltaY < 0) {
+    if (!document.body.classList.contains('scrolling')) {
+      document.body.classList.add('scrolling');
+    }
+    setAudioPlaybackRate(-2);
+    scrollBackward();
 
-  clearTimeout(scrollTimeout);
-  scrollTimeout = setTimeout(() => {
-    document.body.classList.remove('scrolling');
-    setQreditsTransition(false);
-    if (audioPlayer) audioPlayer.playbackRate = 1;
-  }, 42);
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      document.body.classList.remove('scrolling');
+      setQreditsTransition(false);
+      setAudioPlaybackRate(1);
+    }, 42);
+  }
+}
+
+function scrollBackward() {
+  const y = parseInt(getTranslateValues(qreditsEl).y);
+  const newY = Math.min(y + 200, window.innerHeight);
+  qreditsEl.style.transition = 'transform 0.2s linear';
+  qreditsEl.style.transform = `translateY(${newY}px)`;
 }
 
 function handleMessage(event) {
