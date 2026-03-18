@@ -35,27 +35,31 @@ function init(humansTxt) {
   });
 
   const humansTxtEl = document.getElementById('humansTxtQredits');
-  humansTxtEl.innerHTML = convertHumansTxtToHtml(humansTxt);
+  humansTxtEl.replaceChildren(convertHumansTxtToHtml(humansTxt));
   humansTxtLoaded = true;
 }
 
 function convertHumansTxtToHtml(humansTxt) {
-  let html = '';
+  const fragment = document.createDocumentFragment();
   humansTxt.split("\n").forEach((line, index, arr) => {
     if (index === arr.length - 1 && line === "") {
       return;
     }
 
     if (line.indexOf('/*') > -1 && line.indexOf('*/') > -1) {
-      html += line.replace('/*', '<h2>').replace('*/', '</h2>');
+      const el = document.createElement('h2');
+      el.textContent = line.replace('/*', '').replace('*/', '');
+      fragment.appendChild(el);
     } else if (line.length > 0) {
-      html += `<p>${line}</p>`;
+      const el = document.createElement('p');
+      el.textContent = line;
+      fragment.appendChild(el);
     } else {
-      html += '<br>';
+      fragment.appendChild(document.createElement('br'));
     }
   });
 
-  return html;
+  return fragment;
 }
 
 function startQreditRoll() {
