@@ -14,7 +14,7 @@ const QreditRoll = new function() {
     this.addEscapeListener();
 
     window.addEventListener('message', (event) => {
-      if (event.origin.startsWith(this.clientDomain)) {
+      if (event.origin === this.clientDomain) {
         switch (event.data.type) {
           case 'ready':
             this.client.postMessage({ type: 'passHumansTxt', humansTxt: this.humansTxt }, this.clientDomain);
