@@ -8,7 +8,7 @@ const QreditRoll = new function() {
       console.error('Cannot determine domain of QreditRoll script');
       return;
     }
-    this.clientDomain = scriptEl.src.replace('/qreditroll.js', '');
+    this.clientDomain = new URL(scriptEl.src).origin;
 
     this.addKonamiListener();
     this.addEscapeListener();
@@ -39,7 +39,6 @@ const QreditRoll = new function() {
     return fetch('/humans.txt', {
       method: 'GET',
       mode: 'same-origin',
-      cache: 'no-cache',
       credentials: 'same-origin',
       referrerPolicy: 'same-origin'
     }).then(response => {
