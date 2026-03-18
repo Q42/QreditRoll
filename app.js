@@ -191,7 +191,11 @@ function getTranslateValues(element) {
 
   // Can either be 2d or 3d transform
   const matrixType = matrix.includes('3d') ? '3d' : '2d'
-  const matrixValues = matrix.match(/matrix.*\((.+)\)/)[1].split(', ')
+  const matrixMatch = matrix.match(/matrix.*\((.+)\)/)
+  if (!matrixMatch) {
+    return { x: 0, y: 0, z: 0 }
+  }
+  const matrixValues = matrixMatch[1].split(', ')
 
   // 2d matrices have 6 values
   // Last 2 values are X and Y.
