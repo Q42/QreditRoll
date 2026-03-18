@@ -140,14 +140,14 @@ function scrollHandler(event) {
   if (!document.body.classList.contains('scrolling')) {
     document.body.classList.add('scrolling');
     setQreditsTransition(true);
-    audioPlayer.playbackRate = 2;
+    if (audioPlayer) audioPlayer.playbackRate = 2;
   }
 
   clearTimeout(scrollTimeout);
   scrollTimeout = setTimeout(() => {
     document.body.classList.remove('scrolling');
     setQreditsTransition(false);
-    audioPlayer.playbackRate = 1;
+    if (audioPlayer) audioPlayer.playbackRate = 1;
   }, 42);
 }
 

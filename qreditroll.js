@@ -42,7 +42,13 @@ const QreditRoll = new function() {
       cache: 'no-cache',
       credentials: 'same-origin',
       referrerPolicy: 'same-origin'
-    }).then(response => response.text()).then(data => {
+    }).then(response => {
+      if (!response.ok) {
+        console.warn(`QreditRoll: could not load humans.txt (${response.status})`);
+        return null;
+      }
+      return response.text();
+    }).then(data => {
       if (!data || !data.trim()) {
         console.warn('QreditRoll: humans.txt is empty');
         return null;
@@ -87,12 +93,12 @@ const QreditRoll = new function() {
   }
 
   this.addKonamiListener = function() {
-    const allowedKeys = { 37: 'left', 38: 'up', 39: 'right', 40: 'down', 65: 'a', 66: 'b' };
+    const allowedKeys = { 'ArrowLeft': 'left', 'ArrowUp': 'up', 'ArrowRight': 'right', 'ArrowDown': 'down', 'a': 'a', 'b': 'b' };
     const konamiCode = ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'];
     let konamiCodePosition = 0;
 
     document.addEventListener('keydown', (e) => {
-      var key = allowedKeys[e.keyCode];
+      var key = allowedKeys[e.key];
       var requiredKey = konamiCode[konamiCodePosition];
       if (key == requiredKey) {
         konamiCodePosition++;
