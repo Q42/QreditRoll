@@ -1,5 +1,4 @@
 let hostDomain = null;
-let lines = 0;
 let stopTimeout = null;
 let scrollTimeout = null;
 let humansTxtLoaded = false;
@@ -35,9 +34,9 @@ function init(humansTxt) {
     stopTimeout = setTimeout(stopQreditRoll, 1000);
   });
 
-  const qredits = convertHumansTxtToHtml(humansTxt);
   const humansTxtEl = document.getElementById('humansTxtQredits');
-  humansTxtEl.innerHTML = qredits;
+  humansTxtEl.innerHTML = convertHumansTxtToHtml(humansTxt);
+  humansTxtLoaded = true;
 }
 
 function convertHumansTxtToHtml(humansTxt) {
@@ -47,8 +46,6 @@ function convertHumansTxtToHtml(humansTxt) {
       return;
     }
 
-    lines++;
-
     if (line.indexOf('/*') > -1 && line.indexOf('*/') > -1) {
       html += line.replace('/*', '<h2>').replace('*/', '</h2>');
     } else if (line.length > 0) {
@@ -57,8 +54,6 @@ function convertHumansTxtToHtml(humansTxt) {
       html += '<br>';
     }
   });
-
-  humansTxtLoaded = true;
 
   return html;
 }
