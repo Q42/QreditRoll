@@ -1,7 +1,9 @@
 let hostDomain = null;
 let stopTimeout = null;
 let scrollTimeout = null;
-let humansTxtLoaded = false;
+let humansTxtReady;
+let notifyHumansTxtReady;
+humansTxtReady = new Promise(resolve => { notifyHumansTxtReady = resolve; });
 let qreditsEl = null;
 let audioPlayer = null;
 
@@ -36,7 +38,7 @@ function init(humansTxt) {
 
   const humansTxtEl = document.getElementById('humansTxtQredits');
   humansTxtEl.replaceChildren(convertHumansTxtToHtml(humansTxt));
-  humansTxtLoaded = true;
+  notifyHumansTxtReady();
 }
 
 function convertHumansTxtToHtml(humansTxt) {
@@ -63,22 +65,19 @@ function convertHumansTxtToHtml(humansTxt) {
 }
 
 function startQreditRoll() {
-  if (!humansTxtLoaded) {
-    setTimeout(startQreditRoll, 100);
-    return;
-  }
+  humansTxtReady.then(() => {
+    // This timeout gives the browser time to render the original transform property correctly,
+    // before changing it in setQreditsTransition
+    setTimeout(function() {
+      audioPlayer = document.getElementById('player');
+      audioPlayer.volume = 1;
+      audioPlayer.play();
 
-  // This timeout gives the browser time to render the original transform property correctly,
-  // before changing it in setQreditsTransition
-  setTimeout(function() {
-    audioPlayer = document.getElementById('player');
-    audioPlayer.volume = 1;
-    audioPlayer.play();
+      setQreditsTransition(false, true);
 
-    setQreditsTransition(false, true);
-
-    document.body.classList.add('active');
-  }, 10);
+      document.body.classList.add('active');
+    }, 10);
+  });
 }
 
 function stopQreditRoll() {
