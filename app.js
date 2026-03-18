@@ -1,9 +1,8 @@
 let hostDomain = null;
 let stopTimeout = null;
 let scrollTimeout = null;
-let humansTxtReady;
 let notifyHumansTxtReady;
-humansTxtReady = new Promise(resolve => { notifyHumansTxtReady = resolve; });
+const humansTxtReady = new Promise(resolve => { notifyHumansTxtReady = resolve; });
 let qreditsEl = null;
 let audioPlayer = null;
 
@@ -113,7 +112,7 @@ function stopQreditRoll() {
 
 function setQreditsTransition(fast, delayed) {
   const y = parseInt(getTranslateValues(qreditsEl).y);
-  const height = parseInt(window.getComputedStyle(qreditsEl).height.replace('px', ''));
+  const height = parseInt(window.getComputedStyle(qreditsEl).height);
   const distanceLeft = height + y;
   const speedFactor = fast ? 15 : 1;
 
