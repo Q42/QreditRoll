@@ -1,26 +1,29 @@
-const QreditRoll = new function() {
-  this.humansTxt = null;
-  this.frameReady = null;
+const QreditRoll = (() => {
+  let humansTxt = null;
+  let frameReady = null;
+  let frame = null;
+  let client = null;
+  let clientDomain = null;
 
-  this.init = function() {
+  function init() {
     const scriptEl = document.querySelector('script[src*="qreditroll.js"]');
     if (!scriptEl) {
       console.error('Cannot determine domain of QreditRoll script');
       return;
     }
-    this.clientDomain = new URL(scriptEl.src).origin;
+    clientDomain = new URL(scriptEl.src).origin;
 
-    this.addKonamiListener();
-    this.addEscapeListener();
+    addKonamiListener();
+    addEscapeListener();
 
     window.addEventListener('message', (event) => {
-      if (event.origin === this.clientDomain) {
+      if (event.origin === clientDomain) {
         switch (event.data.type) {
           case 'ready':
-            this.client.postMessage({ type: 'passHumansTxt', humansTxt: this.humansTxt }, this.clientDomain);
+            client.postMessage({ type: 'passHumansTxt', humansTxt }, clientDomain);
             break;
           case 'stopQreditRoll':
-            this.stop();
+            stop();
             break;
           default:
             if (!event.data.source || !event.data.source.includes('vue-devtools')) {
@@ -31,9 +34,9 @@ const QreditRoll = new function() {
     });
   }
 
-  this.fetchHumansTxt = function() {
-    if (this.humansTxt !== null) {
-      return Promise.resolve(this.humansTxt);
+  function fetchHumansTxt() {
+    if (humansTxt !== null) {
+      return Promise.resolve(humansTxt);
     }
 
     return fetch('/humans.txt', {
@@ -52,7 +55,7 @@ const QreditRoll = new function() {
         console.warn('QreditRoll: humans.txt is empty');
         return null;
       }
-      this.humansTxt = data;
+      humansTxt = data;
       return data;
     }).catch(err => {
       console.warn('QreditRoll: could not load humans.txt', err);
@@ -60,15 +63,15 @@ const QreditRoll = new function() {
     });
   }
 
-  this.createIFrame = function() {
-    this.frameReady = new Promise((resolve) => {
-      this.frame = document.createElement('iframe');
-      this.frame.onload = () => resolve();
-      this.frame.id = 'qreditrollframe';
-      this.frame.title = 'QreditRoll';
-      this.frame.src = `${this.clientDomain}/qreditroll.html?hostDomain=${encodeURI(window.location.origin)}`;
-      this.frame.allow = 'autoplay';
-      this.frame.style.cssText = `
+  function createIFrame() {
+    frameReady = new Promise((resolve) => {
+      frame = document.createElement('iframe');
+      frame.onload = () => resolve();
+      frame.id = 'qreditrollframe';
+      frame.title = 'QreditRoll';
+      frame.src = `${clientDomain}/qreditroll.html?hostDomain=${encodeURI(window.location.origin)}`;
+      frame.allow = 'autoplay';
+      frame.style.cssText = `
                   border: none;
                   position: fixed;
                   z-index: 999999999;
@@ -78,20 +81,20 @@ const QreditRoll = new function() {
                   right: 0;
                   overflow: hidden;
                   `;
-      document.body.appendChild(this.frame);
-      this.client = document.getElementById(this.frame.id).contentWindow;
+      document.body.appendChild(frame);
+      client = document.getElementById(frame.id).contentWindow;
     });
   }
 
-  this.addEscapeListener = function() {
+  function addEscapeListener() {
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.frame) {
-        this.client.postMessage({ type: 'stopQreditRoll' }, this.clientDomain);
+      if (e.key === 'Escape' && frame) {
+        client.postMessage({ type: 'stopQreditRoll' }, clientDomain);
       }
     });
   }
 
-  this.addKonamiListener = function() {
+  function addKonamiListener() {
     const allowedKeys = { 'ArrowLeft': 'left', 'ArrowUp': 'up', 'ArrowRight': 'right', 'ArrowDown': 'down', 'a': 'a', 'b': 'b' };
     const konamiCode = ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'];
     let konamiCodePosition = 0;
@@ -102,7 +105,7 @@ const QreditRoll = new function() {
       if (key == requiredKey) {
         konamiCodePosition++;
         if (konamiCodePosition == konamiCode.length) {
-          this.start();
+          start();
           konamiCodePosition = 0;
         }
       } else {
@@ -111,16 +114,16 @@ const QreditRoll = new function() {
     });
   }
 
-  this.start = function() {
-    if (!this.frame) {
-      this.createIFrame();
+  function start() {
+    if (!frame) {
+      createIFrame();
     }
 
-    this.fetchHumansTxt().then(humansTxt => {
+    fetchHumansTxt().then(humansTxt => {
       if (!humansTxt) return;
 
-      return this.frameReady.then(() => {
-        this.frame.style.cssText = `
+      return frameReady.then(() => {
+        frame.style.cssText = `
                   border: none;
                   position: fixed;
                   z-index: 999999999;
@@ -131,18 +134,18 @@ const QreditRoll = new function() {
                   overflow: hidden;
                   `;
 
-        this.client.postMessage({ type: 'startQreditRoll' }, this.clientDomain);
+        client.postMessage({ type: 'startQreditRoll' }, clientDomain);
       });
     });
-  };
+  }
 
-  this.stop = function() {
-    if (!this.frame) {
+  function stop() {
+    if (!frame) {
       return;
     }
 
-    this.frameReady.then(() => {
-      this.frame.style.cssText = `
+    frameReady.then(() => {
+      frame.style.cssText = `
                   border: none;
                   position: fixed;
                   z-index: -1;
@@ -155,5 +158,6 @@ const QreditRoll = new function() {
     });
   }
 
-  this.init();
-}();
+  init();
+  return { start, stop };
+})();
