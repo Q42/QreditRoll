@@ -71,7 +71,7 @@ function startQreditRoll() {
     setTimeout(function() {
       audioPlayer = document.getElementById('player');
       audioPlayer.volume = 1;
-      audioPlayer.play();
+      audioPlayer.play().catch(err => console.warn('QreditRoll: audio playback failed', err));
 
       setQreditsTransition(false, true);
 
@@ -163,7 +163,7 @@ function handleMessage(event) {
         stopQreditRoll();
         break;
       default:
-        if (!event.data.source || event.data.source.indexOf('vue-devtools') == -1) {
+        if (!event.data.source || !event.data.source.includes('vue-devtools')) {
           console.log('messagehandler -> function not found:', event.data.type);
         }
     }

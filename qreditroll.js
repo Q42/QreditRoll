@@ -23,7 +23,7 @@ const QreditRoll = new function() {
             this.stop();
             break;
           default:
-            if (!event.data.source || event.data.source.indexOf('vue-devtools') == -1) {
+            if (!event.data.source || !event.data.source.includes('vue-devtools')) {
               console.log('messagehandler -> function not found:', event.data.type);
             }
         }
