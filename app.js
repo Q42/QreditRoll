@@ -82,7 +82,8 @@ async function initAudio() {
     return;
   }
 
-  audioContext = new AudioContext();
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  audioContext = new AudioCtx();
   gainNode = audioContext.createGain();
   gainNode.gain.value = 1;
   gainNode.connect(audioContext.destination);
