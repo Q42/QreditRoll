@@ -5,8 +5,11 @@ const QreditRoll = (() => {
   let client = null;
   let clientDomain = null;
 
+  // Sla het huidige script element meteen op tijdens de eerste (synchrone) uitvoer
+  const currentScript = document.currentScript;
+
   function init() {
-    const scriptEl = document.querySelector('script[src*="qreditroll.js"]');
+    const scriptEl = currentScript || document.querySelector('script[src*="qreditroll.js"]');
     if (!scriptEl) {
       console.error('Cannot determine domain of QreditRoll script');
       return;
