@@ -72,7 +72,7 @@ const QreditRoll = (() => {
       frame.onload = () => resolve();
       frame.id = 'qreditrollframe';
       frame.title = 'QreditRoll';
-      frame.src = `${clientDomain}/qreditroll.html?hostDomain=${encodeURI(window.location.origin)}`;
+      frame.src = `${clientDomain}/qreditroll.html?hostDomain=${encodeURIComponent(window.location.origin)}`;
       frame.allow = 'autoplay';
       frame.style.cssText = `
                   border: none;
@@ -112,7 +112,8 @@ const QreditRoll = (() => {
           konamiCodePosition = 0;
         }
       } else {
-        konamiCodePosition = 0;
+        // If wrong key pressed, check if it's the start of a new sequence
+        konamiCodePosition = (key == konamiCode[0]) ? 1 : 0;
       }
     });
   }
