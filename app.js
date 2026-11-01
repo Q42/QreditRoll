@@ -16,8 +16,7 @@ let audioStartOffset = 0;
 let currentPlaybackRate = 1;
 
 document.addEventListener('DOMContentLoaded', ready);
-document.body.addEventListener("mousewheel", scrollHandler, { passive: false }); // IE9, Chrome, Safari, Opera
-document.body.addEventListener("DOMMouseScroll", scrollHandler, { passive: false }); // Firefox
+document.body.addEventListener("wheel", scrollHandler, { passive: false });
 window.addEventListener('message', handleMessage);
 
 function ready() {
@@ -207,8 +206,8 @@ function setQreditsTransition(fast, delayed) {
   const distanceLeft = height + y;
   const speedFactor = fast ? 15 : 1;
 
-  let duration = distanceLeft / 50 / speedFactor;
-  let delay = delayed ? 2 : 0;
+  const duration = distanceLeft / 50 / speedFactor;
+  const delay = delayed ? 2 : 0;
   qreditsEl.style.transition = `transform ${duration}s linear ${delay}s`;
 
   // For the changed duration to work for a transition in progress, we have to change the transitioning property

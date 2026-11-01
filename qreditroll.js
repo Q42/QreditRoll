@@ -103,8 +103,8 @@ const QreditRoll = (() => {
     let konamiCodePosition = 0;
 
     document.addEventListener('keydown', (e) => {
-      var key = allowedKeys[e.key];
-      var requiredKey = konamiCode[konamiCodePosition];
+      const key = allowedKeys[e.key];
+      const requiredKey = konamiCode[konamiCodePosition];
       if (key == requiredKey) {
         konamiCodePosition++;
         if (konamiCodePosition == konamiCode.length) {
