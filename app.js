@@ -54,7 +54,7 @@ function init(humansTxt) {
 
 function convertHumansTxtToHtml(humansTxt) {
   const fragment = document.createDocumentFragment();
-  humansTxt.split("\n").forEach((line, index, arr) => {
+  humansTxt.split(/\r?\n/).forEach((line, index, arr) => {
     if (index === arr.length - 1 && line === "") {
       return;
     }
@@ -92,7 +92,12 @@ async function initAudio() {
     const response = await fetch('bensound-funnysong.mp3');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const arrayBuffer = await response.arrayBuffer();
-    audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    
+    // Wrap decodeAudioData in a Promise to support older Safari versions that only support the callback syntax
+    audioBuffer = await new Promise((resolve, reject) => {
+      audioContext.decodeAudioData(arrayBuffer, resolve, reject);
+    });
+    
     audioBufferReversed = createReversedBuffer(audioBuffer);
   } catch (err) {
     console.warn('QreditRoll: audio failed to load', err);
