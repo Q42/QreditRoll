@@ -3,10 +3,32 @@ let stopTimeout = null;
 let scrollTimeout = null;
 let notifyHumansTxtReady;
 const humansTxtReady = new Promise(resolve => { notifyHumansTxtReady = resolve; });
+let themeReady = null;
+let notifyMusicPassed;
+const musicPassed = new Promise(resolve => { notifyMusicPassed = resolve; });
+let customMusic = false;
 let qreditsEl = null;
+
+// 'idle' -> 'loading' (start asked, audio loading) -> 'rolling' -> 'closing' (fading out) -> 'idle'
+let state = 'idle';
+let scrollDirection = 0;
+// Decided at the start of each roll: with reduced motion the roll stands still and the page scrolls
+let reducedMotion = false;
+let scrollFrame = null;
+let touchY = 0;
+let touchTimeout = null;
+
+const scrollKeys = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
+// How long (ms) the browser gets to start the sound before the roll goes on without it
+const AUDIO_BLOCKED_WAIT = 500;
+// How long (ms) the roll waits for the site's own stylesheet and music before it starts without them
+const SITE_FILES_WAIT = 8000;
+// Reduced motion: px per second the page scrolls while a direction is held
+const PAGE_SCROLL_SPEED = 600;
 
 // Web Audio API
 let audioContext = null;
+let audioLoading = null;
 let audioBuffer = null;
 let audioBufferReversed = null;
 let audioSource = null;
@@ -14,16 +36,31 @@ let gainNode = null;
 let audioStartContextTime = 0;
 let audioStartOffset = 0;
 let currentPlaybackRate = 1;
+// True when this roll runs without sound: no music, or the browser blocked it
+let silent = false;
 
 document.addEventListener('DOMContentLoaded', ready);
 document.body.addEventListener("wheel", scrollHandler, { passive: false });
+document.body.addEventListener('touchstart', (event) => { touchY = event.touches[0].clientY; }, { passive: true });
+document.body.addEventListener('touchmove', touchHandler, { passive: false });
+document.addEventListener('keydown', (event) => {
+  if (scrollKeys[event.key] && !(event.altKey || event.ctrlKey || event.metaKey)) {
+    event.preventDefault();
+    scrollQreditRoll(scrollKeys[event.key]);
+  }
+});
+document.addEventListener('keyup', (event) => {
+  if (scrollKeys[event.key]) {
+    scrollQreditRoll(0);
+  }
+});
 window.addEventListener('message', handleMessage);
 
 function ready() {
   const url = new URL(window.location.href);
   const params = new URLSearchParams(url.search);
 
-  if (!params.has('hostDomain')) {
+  if (!params.has('hostDomain') || parent === window) {
     console.error('Cannot determine domain of host page');
     return;
   }
@@ -33,7 +70,33 @@ function ready() {
     hostDomain = hostDomain.slice(0, -1);
   }
 
-  parent.postMessage({ type: 'ready' }, hostDomain);
+  // Added once this page has loaded: a stylesheet that is slow or hangs would otherwise hold up
+  // the load of the frame, and the host page waits for that
+  window.addEventListener('load', () => loadTheme(params.get('theme')));
+  customMusic = params.has('music');
+  if (customMusic) {
+    document.getElementById('funnySong').remove();
+  }
+
+  // reportsStart: this version tells the host page when the roll starts (startedQreditRoll)
+  parent.postMessage({ type: 'ready', reportsStart: true }, hostDomain);
+}
+
+// The site's stylesheet comes after style.css, so it only has to hold what it changes
+function loadTheme(url) {
+  if (!url || !/^https?:/.test(url)) return;
+
+  themeReady = new Promise(resolve => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = url;
+    link.onload = resolve;
+    link.onerror = () => {
+      console.warn('QreditRoll: could not load theme', url);
+      resolve();
+    };
+    document.head.appendChild(link);
+  });
 }
 
 function init(humansTxt) {
@@ -42,8 +105,10 @@ function init(humansTxt) {
   qreditsEl.addEventListener('transitionend', () => {
     const y = parseInt(getTranslateValues(qreditsEl).y);
     const height = parseInt(window.getComputedStyle(qreditsEl).height);
-    if (height + y <= 0) {
+    if (state === 'rolling' && height + y <= 0) {
       stopTimeout = setTimeout(stopQreditRoll, 1000);
+    } else if (scrollDirection < 0) {
+      scrollBackward();
     }
   });
 
@@ -75,24 +140,25 @@ function convertHumansTxtToHtml(humansTxt) {
   return fragment;
 }
 
-async function initAudio() {
-  if (audioContext) {
-    gainNode.gain.cancelScheduledValues(audioContext.currentTime);
-    gainNode.gain.value = 1;
-    return;
+function initAudio() {
+  if (!audioContext) {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    audioContext = new AudioCtx();
+    gainNode = audioContext.createGain();
+    gainNode.connect(audioContext.destination);
+    audioLoading = loadAudio();
   }
 
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  audioContext = new AudioCtx();
-  gainNode = audioContext.createGain();
+  gainNode.gain.cancelScheduledValues(audioContext.currentTime);
   gainNode.gain.value = 1;
-  gainNode.connect(audioContext.destination);
+  // A roll that starts while the music is still loading waits for it too
+  return audioLoading;
+}
 
+async function loadAudio() {
   try {
-    const response = await fetch('bensound-funnysong.mp3');
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const arrayBuffer = await response.arrayBuffer();
-    
+    const arrayBuffer = await fetchMusic();
+
     // Wrap decodeAudioData in a Promise to support older Safari versions that only support the callback syntax
     audioBuffer = await new Promise((resolve, reject) => {
       audioContext.decodeAudioData(arrayBuffer, resolve, reject);
@@ -102,6 +168,30 @@ async function initAudio() {
   } catch (err) {
     console.warn('QreditRoll: audio failed to load', err);
   }
+}
+
+// The site's own music is handed over by the host page, the Funny Song is fetched here
+async function fetchMusic() {
+  if (customMusic) {
+    const music = await musicPassed;
+    if (!music) throw new Error('the host page could not load the music');
+    return music;
+  }
+
+  const response = await fetch('bensound-funnysong.mp3');
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.arrayBuffer();
+}
+
+// Whether the browser lets the sound play (autoplay policy). It gives no signal when it does not,
+// so the wait ends by itself
+async function audioAllowed() {
+  if (audioContext.state === 'running') return true;
+
+  return Promise.race([
+    audioContext.resume().then(() => audioContext.state === 'running', () => false),
+    new Promise(resolve => setTimeout(resolve, AUDIO_BLOCKED_WAIT, false))
+  ]);
 }
 
 function createReversedBuffer(buffer) {
@@ -121,7 +211,7 @@ function createReversedBuffer(buffer) {
 }
 
 function playAudio(offset, rate) {
-  if (!audioContext) return;
+  if (!audioContext || silent) return;
 
   const reversed = rate < 0;
   const buffer = reversed ? audioBufferReversed : audioBuffer;
@@ -168,42 +258,82 @@ function setAudioPlaybackRate(rate) {
 }
 
 function startQreditRoll() {
+  if (state !== 'idle') return;
+  state = 'loading';
+
   humansTxtReady.then(() => {
     // This timeout gives the browser time to render the original transform property correctly,
     // before changing it in setQreditsTransition
     setTimeout(async function() {
-      await initAudio();
+      const loading = initAudio();
+      // Asked right away, so the wait for a browser that blocks sound runs while the music loads
+      const allowed = audioAllowed();
+
+      // The site's own files get a limited time: a stylesheet or music that hangs must not keep
+      // the roll from starting. The Funny Song is waited for as always.
+      if (themeReady || customMusic) {
+        const siteFiles = Promise.all([themeReady, customMusic ? loading : null]);
+        await Promise.race([siteFiles, new Promise(resolve => setTimeout(resolve, SITE_FILES_WAIT))]);
+      }
+      if (!customMusic) {
+        await loading;
+      }
+      const plays = audioBuffer !== null && (audioContext.state === 'running' || await allowed);
+
+      // Closed while loading, or a later start got here first
+      if (state !== 'loading') return;
+      state = 'rolling';
+
+      silent = !plays;
       playAudio(0, 1);
 
-      setQreditsTransition(false, true);
+      reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.body.classList.toggle('reduced-motion', reducedMotion);
+      window.scrollTo(0, 0);
+      if (!reducedMotion) {
+        setQreditsTransition(false, true);
+      }
 
       document.body.classList.add('active');
+      parent.postMessage({ type: 'startedQreditRoll', silent }, hostDomain);
     }, 10);
   });
 }
 
 function stopQreditRoll() {
+  if (state === 'closing') return;
+
   clearTimeout(stopTimeout);
   stopTimeout = null;
 
+  // Nothing to fade out; a roll that is still loading sees the state and gives up
+  if (state !== 'rolling') {
+    stopped();
+    return;
+  }
+
+  scrollQreditRoll(0);
+  state = 'closing';
   document.body.classList.remove('active');
 
+  const now = audioContext.currentTime;
+  gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+  gainNode.gain.linearRampToValueAtTime(0, now + 1.6);
   setTimeout(() => {
+    stopAudioSource();
+    // Back to the starting position, so nothing keeps moving in the hidden frame
+    clearTimeout(scrollTimeout);
+    clearTimeout(touchTimeout);
+    document.body.classList.remove('scrolling');
     qreditsEl.style.transition = '';
     qreditsEl.style.transform = '';
-  }, 2000);
+    stopped();
+  }, 1600);
+}
 
-  if (gainNode && audioContext) {
-    const now = audioContext.currentTime;
-    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-    gainNode.gain.linearRampToValueAtTime(0, now + 1.6);
-    setTimeout(() => {
-      stopAudioSource();
-      parent.postMessage({ type: 'stopQreditRoll' }, hostDomain);
-    }, 1600);
-  } else {
-    parent.postMessage({ type: 'stopQreditRoll' }, hostDomain);
-  }
+function stopped() {
+  state = 'idle';
+  parent.postMessage({ type: 'stopQreditRoll' }, hostDomain);
 }
 
 function setQreditsTransition(fast, delayed) {
@@ -225,6 +355,9 @@ function setQreditsTransition(fast, delayed) {
 }
 
 function scrollHandler(event) {
+  // With reduced motion the page scrolls the native way
+  if (reducedMotion) return;
+
   event.preventDefault();
 
   if (event.deltaY > 0) {
@@ -256,6 +389,48 @@ function scrollHandler(event) {
   }
 }
 
+function touchHandler(event) {
+  if (reducedMotion) return;
+
+  event.preventDefault();
+  const y = event.touches[0].clientY;
+  const delta = touchY - y;
+  touchY = y;
+  if (!delta) return;
+
+  // A moving finger comes as a stream of events, like the wheel: scroll while they come in
+  scrollQreditRoll(delta);
+  clearTimeout(touchTimeout);
+  touchTimeout = setTimeout(() => scrollQreditRoll(0), 42);
+}
+
+// For the keys, the finger and the site; the wheel has its own handler above.
+// Keeps going in a direction until told otherwise: 1 fast-forwards, -1 rewinds, 0 is the normal roll
+function scrollQreditRoll(direction) {
+  direction = Math.sign(direction) || 0;
+  if (state !== 'rolling' || direction === scrollDirection) return;
+  scrollDirection = direction;
+
+  if (reducedMotion) {
+    cancelAnimationFrame(scrollFrame);
+    scrollPage(performance.now());
+    return;
+  }
+
+  document.body.classList.toggle('scrolling', direction !== 0);
+  if (direction > 0) {
+    setQreditsTransition(true);
+    setAudioPlaybackRate(1.5);
+  } else if (direction < 0) {
+    // One step; the transitionend listener takes the next one for as long as the direction is held
+    scrollBackward();
+    setAudioPlaybackRate(-2);
+  } else {
+    setQreditsTransition(false);
+    setAudioPlaybackRate(1);
+  }
+}
+
 function scrollBackward() {
   const y = parseInt(getTranslateValues(qreditsEl).y);
   const newY = Math.min(y + 200, window.innerHeight);
@@ -263,14 +438,29 @@ function scrollBackward() {
   qreditsEl.style.transform = `translateY(${newY}px)`;
 }
 
+function scrollPage(since) {
+  if (!scrollDirection) return;
+
+  scrollFrame = requestAnimationFrame((now) => {
+    window.scrollBy(0, scrollDirection * PAGE_SCROLL_SPEED * (now - since) / 1000);
+    scrollPage(now);
+  });
+}
+
 function handleMessage(event) {
-  if (hostDomain && event.origin === hostDomain) {
+  if (hostDomain && event.origin === hostDomain && event.source === parent) {
     switch (event.data.type) {
       case 'passHumansTxt':
         init(event.data.humansTxt);
         break;
+      case 'passMusic':
+        notifyMusicPassed(event.data.music);
+        break;
       case 'startQreditRoll':
         startQreditRoll();
+        break;
+      case 'scrollQreditRoll':
+        scrollQreditRoll(event.data.direction);
         break;
       case 'stopQreditRoll':
         stopQreditRoll();

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>QreditRoll - example with options</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="QreditRoll with its own stylesheet and music, the Konami code switched off, and the page in control.">
+  <link type="text/plain" rel="author" href="humans.txt">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      margin: 1em 20% 16em;
+      max-width: 600px;
+      background: #FFCC00;
+      color: #231900;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 120%;
+    }
+
+    h1 {
+      font-size: 250%;
+      line-height: 1;
+    }
+
+    p, pre {
+      padding-top: 1em;
+    }
+
+    pre, code {
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 85%;
+    }
+
+    pre {
+      overflow-x: auto;
+    }
+
+    a {
+      color: #000;
+      font-weight: 600;
+    }
+
+    /* On top of the roll, so the page can be seen steering it */
+    #controls {
+      position: fixed;
+      z-index: 2147483647;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5em;
+      align-items: flex-start;
+      padding: .75em 1em;
+      background: #231900;
+      color: #FFCC00;
+      font-size: 80%;
+    }
+
+    button {
+      padding: .5em 1em;
+      border: 2px solid #FFCC00;
+      border-radius: 4px;
+      background: transparent;
+      color: #FFCC00;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      touch-action: none;
+      user-select: none;
+    }
+    button:hover {
+      background: #FFCC00;
+      color: #231900;
+    }
+
+    #log {
+      flex: 1 1 14em;
+      height: 6.5em;
+      overflow-y: auto;
+      list-style: none;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+    }
+
+    @media only screen and (max-width: 600px) {
+      body {
+        margin: 1em 5% 20em;
+        font-size: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>QreditRoll with options</h1>
+  <p>This page gives QreditRoll its own stylesheet and its own music, and switches the Konami code off:</p>
+  <pre>&lt;script src="https://qreditroll.com/qreditroll.js"
+        data-theme="theme.css"
+        data-music="music.mp3"
+        data-konami="off"&gt;&lt;/script&gt;</pre>
+  <p>The credits come from <a href="humans.txt">this page's own humans.txt</a>, found through <code>&lt;link rel="author"&gt;</code>. The line "Music: Funny Song" is gone, because that song is not playing.</p>
+  <p>The page steers the roll with <code>QreditRoll.start()</code>, <code>QreditRoll.stop()</code> and <code>QreditRoll.scroll()</code>, and hears from it through the <code>qreditroll:start</code>, <code>qreditroll:stop</code> and <code>qreditroll:silent</code> events. Try the buttons below; the wheel, a finger, the arrow keys and Escape work as on any site.</p>
+  <p>Back to the <a href="../">plain QreditRoll</a>.</p>
+
+  <div id="controls">
+    <button id="open">Open</button>
+    <button id="close">Close</button>
+    <button id="rewind">&#9664;&#9664; Hold to rewind</button>
+    <button id="forward">Hold to fast-forward &#9654;&#9654;</button>
+    <ol id="log" aria-live="polite"><li>Events from QreditRoll show up here.</li></ol>
+  </div>
+
+  <script src="../qreditroll.js" data-theme="theme.css" data-music="music.mp3" data-konami="off"></script>
+  <script>
+    document.getElementById('open').addEventListener('click', () => QreditRoll.start());
+    document.getElementById('close').addEventListener('click', () => QreditRoll.stop());
+
+    // Hold to scroll, let go to return to the normal roll
+    function hold(id, direction) {
+      const button = document.getElementById(id);
+      button.addEventListener('pointerdown', () => QreditRoll.scroll(direction));
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach((name) => {
+        button.addEventListener(name, () => QreditRoll.scroll(0));
+      });
+    }
+    hold('rewind', -1);
+    hold('forward', 1);
+
+    const log = document.getElementById('log');
+    ['start', 'stop', 'silent'].forEach((name) => {
+      document.addEventListener(`qreditroll:${name}`, () => {
+        const line = document.createElement('li');
+        line.textContent = `${new Date().toLocaleTimeString()}  qreditroll:${name}`;
+        log.appendChild(line);
+        log.scrollTop = log.scrollHeight;
+      });
+    });
+  </script>
+</body>
+</html>

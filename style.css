@@ -80,6 +80,18 @@ a:hover {
   height: 4.2em;
 }
 
+/* With prefers-reduced-motion the roll stands still and the page scrolls instead */
+body.reduced-motion {
+  overflow-y: auto;
+}
+body.reduced-motion #close {
+  position: fixed;
+}
+body.reduced-motion #qredits {
+  padding: 2em 0;
+  transform: none;
+}
+
 @media only screen and (max-width: 600px) {
   body {
     font-size: 120%;

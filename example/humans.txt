@@ -1,0 +1,12 @@
+/* TEAM */
+Example page: the QreditRoll options, all at once
+Site: qreditroll.com/example
+
+/* THANKS */
+Everyone who keeps a humans.txt
+Everyone who reads the credits to the end
+
+/* SITE */
+Found through: link rel="author", not the root of the site
+Looks: example/theme.css
+Music: a small chiptune, made for this page
