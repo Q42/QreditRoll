@@ -44,7 +44,10 @@ document.body.addEventListener("wheel", scrollHandler, { passive: false });
 document.body.addEventListener('touchstart', (event) => { touchY = event.touches[0].clientY; }, { passive: true });
 document.body.addEventListener('touchmove', touchHandler, { passive: false });
 document.addEventListener('keydown', (event) => {
-  if (scrollKeys[event.key] && !(event.altKey || event.ctrlKey || event.metaKey)) {
+  // The page does not get the keys while the focus is in the roll, so Escape is caught here too
+  if (event.key === 'Escape' && state !== 'idle') {
+    stopQreditRoll();
+  } else if (scrollKeys[event.key] && !(event.altKey || event.ctrlKey || event.metaKey)) {
     event.preventDefault();
     scrollQreditRoll(scrollKeys[event.key]);
   }

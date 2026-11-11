@@ -51,7 +51,7 @@ Yes, with options on the script tag. Leave them out and QreditRoll is its good o
 Good to know:
 - The stylesheet is loaded by the QreditRoll frame, not by your page. It has to be reachable without logging in, and fonts from your own server need an `Access-Control-Allow-Origin` header.
 - The music is fetched by your own page, so a file on your own site just works. A file on another origin needs CORS headers there (`Access-Control-Allow-Origin`), and with a Content-Security-Policy on your site `connect-src` has to allow it. The music plays once and does not loop.
-- A stylesheet or music that takes longer than 8 seconds is skipped for that roll: it starts with the standard look, or without sound.
+- The roll waits at most 8 seconds for your stylesheet and music, and then starts without them: with the standard look, or without sound. A stylesheet that comes in later is still applied, even in the middle of the roll.
 - If you add the script later, from your own code, set the options on `script.dataset` before you append it.
 
 ## Can my page control the roll?
@@ -78,4 +78,4 @@ document.addEventListener('qreditroll:stop', () => myMusic.play());
 ```
 
 ## How do I run this myself?
-It's all static files, so just spin up a simple webserver, like `python -m SimpleHTTPServer 8000`, and go to http://localhost:8000/.
+It's all static files, so just spin up a simple webserver, like `python3 -m http.server 8000`, and go to http://localhost:8000/.
