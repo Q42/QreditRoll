@@ -1,4 +1,12 @@
-const QreditRoll = (() => {
+// var and not const: a page that loads this script a second time must not get a syntax error
+var QreditRoll = (() => {
+  // Loaded before: the first script tag and its options stay in charge. Kept under a key of its own:
+  // window.QreditRoll can also be an element with that id, or something the page put there itself
+  const loadedKey = Symbol.for('QreditRoll');
+  if (window[loadedKey]) {
+    return window[loadedKey];
+  }
+
   let humansTxt = null;
   let humansTxtPassed = false;
   let frameReady = null;
@@ -15,7 +23,12 @@ const QreditRoll = (() => {
   let state = 'idle';
   // True between the qreditroll:start and qreditroll:stop events
   let rolling = false;
+  // What had the keyboard focus on the page when the roll opened
+  let focusBefore = null;
+  let stopTimer = null;
 
+  // How long (ms) the frame gets to fade out (1.6 s) and report back, before the page closes the roll itself
+  const STOP_WAIT = 3000;
   const scrollKeys = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
 
   // Sla het huidige script element meteen op tijdens de eerste (synchrone) uitvoer
@@ -37,7 +50,7 @@ const QreditRoll = (() => {
     addKeyListeners();
 
     window.addEventListener('message', (event) => {
-      if (event.origin === clientDomain && event.source === client) {
+      if (client && event.origin === clientDomain && event.source === client) {
         switch (event.data.type) {
           case 'ready':
             frameReportsStart = event.data.reportsStart === true;
@@ -158,6 +171,8 @@ const QreditRoll = (() => {
 
   // The site's own music is fetched here, by the site itself: a file on the site needs no CORS headers
   function passMusic() {
+    const target = client;
+
     fetch(music).then(response => {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -167,7 +182,10 @@ const QreditRoll = (() => {
       console.warn(`QreditRoll: could not load ${music} (${err.message})`);
       return null;
     }).then(data => frameReady.then(() => {
-      client.postMessage({ type: 'passMusic', music: data }, clientDomain, data ? [data] : []);
+      // Not to a frame that stop() has taken away in the meantime
+      if (target === client) {
+        target.postMessage({ type: 'passMusic', music: data }, clientDomain, data ? [data] : []);
+      }
     }));
   }
 
@@ -238,6 +256,7 @@ const QreditRoll = (() => {
       return;
     }
     state = 'open';
+    focusBefore = document.activeElement;
 
     if (!humansTxtPassed) {
       client.postMessage({ type: 'passHumansTxt', humansTxt: txt }, clientDomain);
@@ -263,12 +282,16 @@ const QreditRoll = (() => {
     client.postMessage({ type: 'startQreditRoll' }, clientDomain);
   }
 
-  // The frame fades out first and then reports back, see hide()
+  // The frame fades out first and then reports back, see hide(). A frame that does not report back
+  // is taken away, so the roll closes anyway
   function stop() {
     if (state === 'loading') {
       state = 'idle';
     } else if (state === 'open') {
       client.postMessage({ type: 'stopQreditRoll' }, clientDomain);
+      if (!stopTimer) {
+        stopTimer = setTimeout(() => hide(true), STOP_WAIT);
+      }
     }
   }
 
@@ -279,12 +302,32 @@ const QreditRoll = (() => {
     }
   }
 
-  function hide() {
+  function hide(discardFrame) {
     if (!frame) {
       return;
     }
+    clearTimeout(stopTimer);
+    stopTimer = null;
 
-    frame.style.cssText = `
+    // A click in the roll took the keyboard focus into the frame: the page gets it back
+    if (document.activeElement === frame) {
+      if (focusBefore) {
+        focusBefore.focus({ preventScroll: true });
+      }
+      // Nothing had the focus, or that element is gone. (Blurring the frame does nothing in Safari.)
+      if (document.activeElement === frame) {
+        window.focus();
+      }
+    }
+
+    if (discardFrame) {
+      // This frame did not answer: the next start() makes a new one
+      frame.remove();
+      frame = null;
+      client = null;
+      humansTxtPassed = false;
+    } else {
+      frame.style.cssText = `
                   border: none;
                   position: fixed;
                   z-index: -1;
@@ -294,6 +337,7 @@ const QreditRoll = (() => {
                   right: 0;
                   overflow: hidden;
                   `;
+    }
     state = 'idle';
 
     if (rolling) {
@@ -303,8 +347,8 @@ const QreditRoll = (() => {
   }
 
   init();
-  return { start, stop, scroll };
+  return (window[loadedKey] = { start, stop, scroll });
 })();
 
-// A top-level const is not a property of window; sites that load this script later look there
+// For a page that loads this script as a module: the var above is not a property of window there
 window.QreditRoll = QreditRoll;
