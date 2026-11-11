@@ -3,7 +3,7 @@ let stopTimeout = null;
 let scrollTimeout = null;
 let notifyHumansTxtReady;
 const humansTxtReady = new Promise(resolve => { notifyHumansTxtReady = resolve; });
-let themeReady = Promise.resolve();
+let themeReady = null;
 let notifyMusicPassed;
 const musicPassed = new Promise(resolve => { notifyMusicPassed = resolve; });
 let customMusic = false;
@@ -16,10 +16,13 @@ let scrollDirection = 0;
 let reducedMotion = false;
 let scrollFrame = null;
 let touchY = 0;
+let touchTimeout = null;
 
 const scrollKeys = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
 // How long (ms) the browser gets to start the sound before the roll goes on without it
 const AUDIO_BLOCKED_WAIT = 500;
+// How long (ms) the roll waits for the site's own stylesheet and music before it starts without them
+const SITE_FILES_WAIT = 8000;
 // Reduced motion: px per second the page scrolls while a direction is held
 const PAGE_SCROLL_SPEED = 600;
 
@@ -57,7 +60,7 @@ function ready() {
   const url = new URL(window.location.href);
   const params = new URLSearchParams(url.search);
 
-  if (!params.has('hostDomain')) {
+  if (!params.has('hostDomain') || parent === window) {
     console.error('Cannot determine domain of host page');
     return;
   }
@@ -67,13 +70,16 @@ function ready() {
     hostDomain = hostDomain.slice(0, -1);
   }
 
-  loadTheme(params.get('theme'));
+  // Added once this page has loaded: a stylesheet that is slow or hangs would otherwise hold up
+  // the load of the frame, and the host page waits for that
+  window.addEventListener('load', () => loadTheme(params.get('theme')));
   customMusic = params.has('music');
   if (customMusic) {
     document.getElementById('funnySong').remove();
   }
 
-  parent.postMessage({ type: 'ready' }, hostDomain);
+  // reportsStart: this version tells the host page when the roll starts (startedQreditRoll)
+  parent.postMessage({ type: 'ready', reportsStart: true }, hostDomain);
 }
 
 // The site's stylesheet comes after style.css, so it only has to hold what it changes
@@ -101,6 +107,8 @@ function init(humansTxt) {
     const height = parseInt(window.getComputedStyle(qreditsEl).height);
     if (state === 'rolling' && height + y <= 0) {
       stopTimeout = setTimeout(stopQreditRoll, 1000);
+    } else if (scrollDirection < 0) {
+      scrollBackward();
     }
   });
 
@@ -253,14 +261,23 @@ function startQreditRoll() {
   if (state !== 'idle') return;
   state = 'loading';
 
-  humansTxtReady.then(() => themeReady).then(() => {
+  humansTxtReady.then(() => {
     // This timeout gives the browser time to render the original transform property correctly,
     // before changing it in setQreditsTransition
     setTimeout(async function() {
       const loading = initAudio();
       // Asked right away, so the wait for a browser that blocks sound runs while the music loads
       const allowed = audioAllowed();
-      await loading;
+
+      // The site's own files get a limited time: a stylesheet or music that hangs must not keep
+      // the roll from starting. The Funny Song is waited for as always.
+      if (themeReady || customMusic) {
+        const siteFiles = Promise.all([themeReady, customMusic ? loading : null]);
+        await Promise.race([siteFiles, new Promise(resolve => setTimeout(resolve, SITE_FILES_WAIT))]);
+      }
+      if (!customMusic) {
+        await loading;
+      }
       const plays = audioBuffer !== null && (audioContext.state === 'running' || await allowed);
 
       // Closed while loading, or a later start got here first
@@ -305,6 +322,9 @@ function stopQreditRoll() {
   setTimeout(() => {
     stopAudioSource();
     // Back to the starting position, so nothing keeps moving in the hidden frame
+    clearTimeout(scrollTimeout);
+    clearTimeout(touchTimeout);
+    document.body.classList.remove('scrolling');
     qreditsEl.style.transition = '';
     qreditsEl.style.transform = '';
     stopped();
@@ -335,28 +355,56 @@ function setQreditsTransition(fast, delayed) {
 }
 
 function scrollHandler(event) {
-  scrollPulse(event, event.deltaY);
-}
-
-function touchHandler(event) {
-  const y = event.touches[0].clientY;
-  scrollPulse(event, touchY - y);
-  touchY = y;
-}
-
-// Wheel and finger come as a stream of events: scroll while they come in, back to normal when they stop
-function scrollPulse(event, delta) {
   // With reduced motion the page scrolls the native way
   if (reducedMotion) return;
 
   event.preventDefault();
-  if (!delta) return;
 
-  scrollQreditRoll(delta);
-  clearTimeout(scrollTimeout);
-  scrollTimeout = setTimeout(() => scrollQreditRoll(0), 42);
+  if (event.deltaY > 0) {
+    if (!document.body.classList.contains('scrolling')) {
+      document.body.classList.add('scrolling');
+      setQreditsTransition(true);
+    }
+    setAudioPlaybackRate(1.5);
+
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      document.body.classList.remove('scrolling');
+      setQreditsTransition(false);
+      setAudioPlaybackRate(1);
+    }, 42);
+  } else if (event.deltaY < 0) {
+    if (!document.body.classList.contains('scrolling')) {
+      document.body.classList.add('scrolling');
+    }
+    setAudioPlaybackRate(-2);
+    scrollBackward();
+
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      document.body.classList.remove('scrolling');
+      setQreditsTransition(false);
+      setAudioPlaybackRate(1);
+    }, 42);
+  }
 }
 
+function touchHandler(event) {
+  if (reducedMotion) return;
+
+  event.preventDefault();
+  const y = event.touches[0].clientY;
+  const delta = touchY - y;
+  touchY = y;
+  if (!delta) return;
+
+  // A moving finger comes as a stream of events, like the wheel: scroll while they come in
+  scrollQreditRoll(delta);
+  clearTimeout(touchTimeout);
+  touchTimeout = setTimeout(() => scrollQreditRoll(0), 42);
+}
+
+// For the keys, the finger and the site; the wheel has its own handler above.
 // Keeps going in a direction until told otherwise: 1 fast-forwards, -1 rewinds, 0 is the normal roll
 function scrollQreditRoll(direction) {
   direction = Math.sign(direction) || 0;
@@ -374,6 +422,7 @@ function scrollQreditRoll(direction) {
     setQreditsTransition(true);
     setAudioPlaybackRate(1.5);
   } else if (direction < 0) {
+    // One step; the transitionend listener takes the next one for as long as the direction is held
     scrollBackward();
     setAudioPlaybackRate(-2);
   } else {
@@ -384,9 +433,9 @@ function scrollQreditRoll(direction) {
 
 function scrollBackward() {
   const y = parseInt(getTranslateValues(qreditsEl).y);
-  const distance = Math.max(window.innerHeight - y, 0);
-  qreditsEl.style.transition = `transform ${distance / 1000}s linear`;
-  qreditsEl.style.transform = `translateY(${window.innerHeight}px)`;
+  const newY = Math.min(y + 200, window.innerHeight);
+  qreditsEl.style.transition = 'transform 0.2s linear';
+  qreditsEl.style.transform = `translateY(${newY}px)`;
 }
 
 function scrollPage(since) {
@@ -399,7 +448,7 @@ function scrollPage(since) {
 }
 
 function handleMessage(event) {
-  if (hostDomain && event.origin === hostDomain) {
+  if (hostDomain && event.origin === hostDomain && event.source === parent) {
     switch (event.data.type) {
       case 'passHumansTxt':
         init(event.data.humansTxt);

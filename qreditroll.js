@@ -3,6 +3,8 @@ const QreditRoll = (() => {
   let humansTxtPassed = false;
   let frameReady = null;
   let notifyFrameAnnounced = null;
+  // False for an older cached frame, which does not report when the roll starts
+  let frameReportsStart = false;
   let frame = null;
   let client = null;
   let clientDomain = null;
@@ -35,12 +37,14 @@ const QreditRoll = (() => {
     addKeyListeners();
 
     window.addEventListener('message', (event) => {
-      if (event.origin === clientDomain) {
+      if (event.origin === clientDomain && event.source === client) {
         switch (event.data.type) {
           case 'ready':
+            frameReportsStart = event.data.reportsStart === true;
             notifyFrameAnnounced();
             break;
           case 'startedQreditRoll':
+            frame.style.pointerEvents = '';
             rolling = true;
             notify('start');
             if (event.data.silent) {
@@ -152,7 +156,7 @@ const QreditRoll = (() => {
     }
   }
 
-  // The site's own music is fetched here, by the site itself, so it needs no CORS headers
+  // The site's own music is fetched here, by the site itself: a file on the site needs no CORS headers
   function passMusic() {
     fetch(music).then(response => {
       if (!response.ok) {
@@ -250,6 +254,11 @@ const QreditRoll = (() => {
                   left: 0;
                   overflow: hidden;
                   `;
+    // The frame has its full size while the roll loads, but is still invisible: until the roll
+    // starts, clicks and touches go through it to the page
+    if (frameReportsStart) {
+      frame.style.pointerEvents = 'none';
+    }
 
     client.postMessage({ type: 'startQreditRoll' }, clientDomain);
   }
