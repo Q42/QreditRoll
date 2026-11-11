@@ -1,0 +1,23 @@
+/* Example theme. It is loaded after QreditRoll's own style.css, so it only holds what differs. */
+
+body {
+  color: #f3e9d2;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+/* The backdrop behind the roll */
+body.active {
+  background-color: #14213d;
+}
+
+h2 {
+  color: #fca311;
+  font-weight: 400;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+a,
+#close {
+  color: #fca311;
+}
