@@ -260,7 +260,8 @@ function setAudioPlaybackRate(rate) {
   playAudio(getCurrentAudioOffset(), rate);
 }
 
-function startQreditRoll() {
+// muted: the host page asked for this roll without sound. Then it does not load or wait for the music
+function startQreditRoll(muted) {
   if (state !== 'idle') return;
   state = 'loading';
 
@@ -268,20 +269,21 @@ function startQreditRoll() {
     // This timeout gives the browser time to render the original transform property correctly,
     // before changing it in setQreditsTransition
     setTimeout(async function() {
-      const loading = initAudio();
+      const loading = muted ? null : initAudio();
       // Asked right away, so the wait for a browser that blocks sound runs while the music loads
-      const allowed = audioAllowed();
+      const allowed = muted ? false : audioAllowed();
+      const waitForMusic = customMusic && !muted;
 
       // The site's own files get a limited time: a stylesheet or music that hangs must not keep
       // the roll from starting. The Funny Song is waited for as always.
-      if (themeReady || customMusic) {
-        const siteFiles = Promise.all([themeReady, customMusic ? loading : null]);
+      if (themeReady || waitForMusic) {
+        const siteFiles = Promise.all([themeReady, waitForMusic ? loading : null]);
         await Promise.race([siteFiles, new Promise(resolve => setTimeout(resolve, SITE_FILES_WAIT))]);
       }
       if (!customMusic) {
         await loading;
       }
-      const plays = audioBuffer !== null && (audioContext.state === 'running' || await allowed);
+      const plays = !muted && audioBuffer !== null && (audioContext.state === 'running' || await allowed);
 
       // Closed while loading, or a later start got here first
       if (state !== 'loading') return;
@@ -319,9 +321,12 @@ function stopQreditRoll() {
   state = 'closing';
   document.body.classList.remove('active');
 
-  const now = audioContext.currentTime;
-  gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-  gainNode.gain.linearRampToValueAtTime(0, now + 1.6);
+  // A roll that never had sound has no audio to fade
+  if (audioContext) {
+    const now = audioContext.currentTime;
+    gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+    gainNode.gain.linearRampToValueAtTime(0, now + 1.6);
+  }
   setTimeout(() => {
     stopAudioSource();
     // Back to the starting position, so nothing keeps moving in the hidden frame
@@ -460,7 +465,7 @@ function handleMessage(event) {
         notifyMusicPassed(event.data.music);
         break;
       case 'startQreditRoll':
-        startQreditRoll();
+        startQreditRoll(event.data.silent === true);
         break;
       case 'scrollQreditRoll':
         scrollQreditRoll(event.data.direction);

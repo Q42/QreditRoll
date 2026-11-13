@@ -18,6 +18,8 @@ var QreditRoll = (() => {
   let clientDomain = null;
   let theme = null;
   let music = null;
+  // Asked with start({ silent: true }): this roll plays no sound. Decided anew at every start()
+  let startSilent = false;
 
   // 'idle' -> 'loading' (start() was called) -> 'open' (the frame is showing) -> 'idle'
   let state = 'idle';
@@ -228,11 +230,13 @@ var QreditRoll = (() => {
     });
   }
 
-  function start() {
+  // start({ silent: true }) opens this roll without sound, for a page whose own sound is switched off
+  function start(options) {
     if (state !== 'idle') {
       return;
     }
     state = 'loading';
+    startSilent = !!(options && options.silent);
 
     if (!frame) {
       createIFrame();
@@ -279,7 +283,7 @@ var QreditRoll = (() => {
       frame.style.pointerEvents = 'none';
     }
 
-    client.postMessage({ type: 'startQreditRoll' }, clientDomain);
+    client.postMessage({ type: 'startQreditRoll', silent: startSilent }, clientDomain);
   }
 
   // The frame fades out first and then reports back, see hide(). A frame that does not report back
