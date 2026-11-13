@@ -102,11 +102,12 @@
         data-music="music.mp3"
         data-konami="off"&gt;&lt;/script&gt;</pre>
   <p>The credits come from <a href="humans.txt">this page's own humans.txt</a>, found through <code>&lt;link rel="author"&gt;</code>. The line "Music: Funny Song" is gone, because that song is not playing.</p>
-  <p>The page steers the roll with <code>QreditRoll.start()</code>, <code>QreditRoll.stop()</code> and <code>QreditRoll.scroll()</code>, and hears from it through the <code>qreditroll:start</code>, <code>qreditroll:stop</code> and <code>qreditroll:silent</code> events. Try the buttons below; the wheel, a finger, the arrow keys and Escape work as on any site.</p>
+  <p>The page steers the roll with <code>QreditRoll.start()</code> (or <code>QreditRoll.start({ silent: true })</code> for a roll without sound), <code>QreditRoll.stop()</code> and <code>QreditRoll.scroll()</code>, and hears from it through the <code>qreditroll:start</code>, <code>qreditroll:stop</code> and <code>qreditroll:silent</code> events. Try the buttons below; the wheel, a finger, the arrow keys and Escape work as on any site.</p>
   <p>Back to the <a href="../">plain QreditRoll</a>.</p>
 
   <div id="controls">
     <button id="open">Open</button>
+    <button id="open-silent">Open without sound</button>
     <button id="close">Close</button>
     <button id="rewind">&#9664;&#9664; Hold to rewind</button>
     <button id="forward">Hold to fast-forward &#9654;&#9654;</button>
@@ -116,6 +117,7 @@
   <script src="../qreditroll.js" data-theme="theme.css" data-music="music.mp3" data-konami="off"></script>
   <script>
     document.getElementById('open').addEventListener('click', () => QreditRoll.start());
+    document.getElementById('open-silent').addEventListener('click', () => QreditRoll.start({ silent: true }));
     document.getElementById('close').addEventListener('click', () => QreditRoll.stop());
 
     // Hold to scroll, let go to return to the normal roll

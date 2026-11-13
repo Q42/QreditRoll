@@ -60,6 +60,7 @@ Yes. That is how you hook up a game controller, for example.
 | Call | What it does |
 | --- | --- |
 | `QreditRoll.start()` | Opens the roll. |
+| `QreditRoll.start({ silent: true })` | Opens the roll without sound, for when the sound on your page is switched off. It counts for this roll only: pass it every time you open the roll. |
 | `QreditRoll.stop()` | Closes the roll. |
 | `QreditRoll.scroll(direction)` | `1` fast-forwards, `-1` rewinds, `0` lets the roll run by itself again. It keeps going until you call it again. |
 
@@ -69,9 +70,10 @@ QreditRoll tells your page what happens with events on `document`:
 | --- | --- |
 | `qreditroll:start` | The roll starts rolling. |
 | `qreditroll:stop` | The roll has closed, by itself at the end or because someone closed it. |
-| `qreditroll:silent` | Right after `qreditroll:start`, if this roll has no sound: the browser blocked it, or the music could not be loaded. |
+| `qreditroll:silent` | Right after `qreditroll:start`, if this roll has no sound: you asked for that, the browser blocked it, or the music could not be loaded. |
 
 ```js
+creditsButton.addEventListener('click', () => QreditRoll.start({ silent: mySoundIsOff }));
 document.addEventListener('qreditroll:start', () => myMusic.pause());
 document.addEventListener('qreditroll:silent', () => myMusic.play());
 document.addEventListener('qreditroll:stop', () => myMusic.play());
