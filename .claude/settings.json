@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "simple-agentic-agile-flow": {
+      "source": {
+        "source": "github",
+        "repo": "chriswaalberg/simple-agentic-agile-flow"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "simple-agentic-agile-flow@simple-agentic-agile-flow": true
+  }
+}
