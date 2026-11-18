@@ -1,0 +1,84 @@
+# Every push to master: build once (a copy of the public files), put that build on staging
+# (q42.github.io/qreditroll-staging/) and, after approval, exactly that build live on qreditroll.com.
+# Approve: the environment github-pages has a required reviewer; GitHub sends a notification and the run
+# waits. A newer push cancels a waiting run, so you always approve the version that is on staging.
+# A push with only .md files doesn't run.
+name: Pages
+
+on:
+  push:
+    # TEMPORARY: claude/agile-flow-plugin, to try staging before the merge. Remove before merging.
+    branches: [master, claude/agile-flow-plugin]
+    paths-ignore: ['**/*.md']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the version is the number of commits
+      # No build step: the site is its public files.
+      - run: |
+          mkdir _site
+          cp -r index.html qreditroll.html qreditroll.js app.js style.css humans.txt favicon.ico \
+            q42-logo-white.svg qreditroll.png videotape.gif bensound-funnysong.mp3 CNAME example _site/
+      - id: version
+        run: echo "version=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  staging:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://q42.github.io/qreditroll-staging/
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: github-pages
+      # One fresh commit on the gh-pages branch of Q42/qreditroll-staging; that repo serves it.
+      - name: To Q42/qreditroll-staging
+        env:
+          DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          mkdir site && tar -xf artifact.tar -C site && touch site/.nojekyll
+          rm -f site/CNAME # the custom domain belongs to production only
+          install -m 600 /dev/null ~/deploy_key && printf '%s\n' "$DEPLOY_KEY" > ~/deploy_key
+          cd site
+          git init -q -b gh-pages
+          git add --all
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -q -m "Version $VERSION ($GITHUB_SHA)"
+          GIT_SSH_COMMAND='ssh -i ~/deploy_key -o StrictHostKeyChecking=accept-new' \
+            git push -q --force git@github.com:Q42/qreditroll-staging.git gh-pages
+          echo "Version $VERSION is on staging: https://q42.github.io/qreditroll-staging/" >> "$GITHUB_STEP_SUMMARY"
+
+  production:
+    if: github.ref_name == 'master'
+    needs: [build, staging]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    # The run waits here for approval (required reviewer on this environment).
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
+      - run: echo "Version ${{ needs.build.outputs.version }} is live." >> "$GITHUB_STEP_SUMMARY"

@@ -16,6 +16,8 @@ var QreditRoll = (() => {
   let frame = null;
   let client = null;
   let clientDomain = null;
+  // The frame page, next to the script: also right when the script lives in a subfolder (staging)
+  let frameUrl = null;
   let theme = null;
   let music = null;
   // Asked with start({ silent: true }): this roll plays no sound. Decided anew at every start()
@@ -43,6 +45,7 @@ var QreditRoll = (() => {
       return;
     }
     clientDomain = new URL(scriptEl.src).origin;
+    frameUrl = new URL('qreditroll.html', scriptEl.src).href;
     theme = resolveUrl(scriptEl.dataset.theme);
     music = resolveUrl(scriptEl.dataset.music);
 
@@ -149,7 +152,7 @@ var QreditRoll = (() => {
     ]);
     frame.id = 'qreditrollframe';
     frame.title = 'QreditRoll';
-    frame.src = `${clientDomain}/qreditroll.html?hostDomain=${encodeURIComponent(window.location.origin)}`
+    frame.src = `${frameUrl}?hostDomain=${encodeURIComponent(window.location.origin)}`
       + (theme ? `&theme=${encodeURIComponent(theme)}` : '')
       + (music ? `&music=${encodeURIComponent(music)}` : '');
     frame.allow = 'autoplay';
