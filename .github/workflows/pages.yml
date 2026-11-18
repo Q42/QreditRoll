@@ -1,5 +1,5 @@
 # Every push to master: build once (a copy of the public files), put that build on staging
-# (q42.github.io/qreditroll-staging/) and, after approval, exactly that build live on qreditroll.com.
+# (private Pages: miniature-tribble-w99m4kk.pages.github.io, GitHub login with access to Q42/qreditroll-staging) and, after approval, exactly that build live on qreditroll.com.
 # Approve: the environment github-pages has a required reviewer; GitHub sends a notification and the run
 # waits. A newer push cancels a waiting run, so you always approve the version that is on staging.
 # A push with only .md files doesn't run.
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: staging
-      url: https://q42.github.io/qreditroll-staging/
+      url: https://miniature-tribble-w99m4kk.pages.github.io/
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -65,7 +65,7 @@ jobs:
             commit -q -m "Version $VERSION ($GITHUB_SHA)"
           GIT_SSH_COMMAND='ssh -i ~/deploy_key -o StrictHostKeyChecking=accept-new' \
             git push -q --force git@github.com:Q42/qreditroll-staging.git gh-pages
-          echo "Version $VERSION is on staging: https://q42.github.io/qreditroll-staging/" >> "$GITHUB_STEP_SUMMARY"
+          echo "Version $VERSION is on staging: https://miniature-tribble-w99m4kk.pages.github.io/" >> "$GITHUB_STEP_SUMMARY"
 
   production:
     if: github.ref_name == 'master'
