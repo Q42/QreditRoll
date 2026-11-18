@@ -7,8 +7,7 @@ name: Pages
 
 on:
   push:
-    # TEMPORARY: claude/agile-flow-plugin, to try staging before the merge. Remove before merging.
-    branches: [master, claude/agile-flow-plugin]
+    branches: [master]
     paths-ignore: ['**/*.md']
   workflow_dispatch:
 
